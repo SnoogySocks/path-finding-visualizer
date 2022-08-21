@@ -1,55 +1,79 @@
+/* eslint-disable no-mixed-operators */
 import React, {useState, useEffect, useCallback} from "react";
 
 // files
-import { START_END_COORDS, GRID_SIZE } from "../../constants";
-import Node from "../Node";
+import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants.js"   
 
 // local imports
+import Node from "../Node"
 import "./Grid.css";
 
 const Grid = () => {
   const [grid, setGrid] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
-  
+
   const initNode = useCallback((row, col) => {
-    let state = "";
+    let state = NODE_STATE.NONE;
     if (row===START_END_COORDS.START_NODE_ROW && col===START_END_COORDS.START_NODE_COL) {
-      state = "node-start";
+      state = NODE_STATE.START;
     } else if (row===START_END_COORDS.END_NODE_ROW && col===START_END_COORDS.END_NODE_COL) {
-      state = "node-end";
+      state = NODE_STATE.FINISH;
     }
 
     return {
       row, col, state,
       distance: Infinity,
-    }
-  }, [])
+    };
+  }, []);
 
   const initGrid = useCallback(() => {
-      let grid = [];
-      for (let r = 0; r<GRID_SIZE.ROW_SIZE; ++r) {
-        let row = [];
-        for (let c = 0; c<GRID_SIZE.COL_SIZE; ++c) {
-          row.push(initNode(r, c));
+      let grid = new Array(GRID_SIZE.ROW_SIZE);
+      for (let r = 0; r<grid.length; ++r) {
+        let row = new Array(GRID_SIZE.COL_SIZE);
+        for (let c = 0; c<row.length; ++c) {
+          row[c] = initNode(r, c);
         }
-        grid.push(row);
+        grid[r] = row;
       }
       return grid;
   }, [initNode]);
+  
+  // Create a new grid with grid[row][col] modified to value
+  let setNewGridCell = (row, col, value) => {
+    let newGrid = new Array(grid.length);
+    for (let r = 0; r<grid.length; ++r) {
+      newGrid[r] = [...grid[r]];
+    }
+    newGrid[row][col] = value;
+    return newGrid;
+  }
 
-  // Start placing walls onto the grid
+  // Create a new grid with grid[row][col] toggled between a wall or none
+  let toggleNewGridWall = (row, col) => {
+    let value = {
+      ...grid[row][col],
+      state: grid[row][col].state===NODE_STATE.WALL ? NODE_STATE.NONE : NODE_STATE.WALL,
+    };
+    setGrid(setNewGridCell(row, col, value));
+  }
+
+  // Start toggling cells between wall and none
   const handleMouseDown = (row, col) => {
-
+    setMouseIsPressed(true);
+    toggleNewGridWall(row, col);
   }
 
-  // Stop placing walls onto the grid
+  // Stop toggling cells between wall and none
   const handleMouseUp = (row, col) => {
-
+    setMouseIsPressed(false);
   }
 
-  // Place walls on the grid when mouseIsPressed
+  // Toggle the entered cell between a wall or none
   const handleMouseEnter = (row, col) => {
-
+    if (!mouseIsPressed
+        || grid[row][col].state!==NODE_STATE.WALL
+        && grid[row][col].state!==NODE_STATE.NONE) return;
+    toggleNewGridWall(row, col);
   }
 
   useEffect(() => {
@@ -58,30 +82,32 @@ const Grid = () => {
 
   return (
     <div className="grid-container">
-      <table>
-        <tbody className="grid">
-          {grid.map((row, rowIdx) => {
+      <div className="grid-table-container">
+        <table>
+          <tbody className="grid">
+            {grid.map((row, rowIdx) => {
 
-            return (<tr key={rowIdx}>
-              {row.map((node, nodeIdx) => {
-                const {row, col, state} = node;
+              return (<tr key={rowIdx}>
+                {row.map((node, nodeIdx) => {
+                  const {row, col, state} = node;
 
-                return (<Node 
-                  key={nodeIdx}
-                  row={row}
-                  col={col}
-                  state={state}
-                  onMouseDown={(row, col) => handleMouseDown(row, col)}
-                  onMouseUp={(row, col) => handleMouseUp(row, col)}
-                  onMouseEnter={(row, col) => handleMouseEnter(row, col)}
-                />);
+                  return (<Node 
+                    key={nodeIdx}
+                    row={row}
+                    col={col}
+                    state={state}
+                    onMouseDown={(row, col) => handleMouseDown(row, col)}
+                    onMouseUp={(row, col) => handleMouseUp(row, col)}
+                    onMouseEnter={(row, col) => handleMouseEnter(row, col)}
+                  />);
 
-              })}
-            </tr>)
+                })}
+              </tr>)
 
-          })}
-        </tbody>
-      </table>
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

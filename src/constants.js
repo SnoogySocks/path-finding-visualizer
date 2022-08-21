@@ -9,3 +9,11 @@ export const GRID_SIZE = {
     ROW_SIZE: 22,
     COL_SIZE: 50,
 }
+
+export const NODE_STATE = {
+    NONE: "",
+    FINISH: "node-finish",
+    START: "node-start",
+    VISITED: "node-visited",
+    WALL: "node-wall",
+}

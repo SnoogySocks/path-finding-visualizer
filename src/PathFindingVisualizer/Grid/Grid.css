@@ -12,6 +12,11 @@
   padding: 20px;
 }
 
+.grid-container table {
+  outline: 5px solid #355871;
+  padding: 2px;
+}
+
 .grid {
   white-space: pre;
 }
