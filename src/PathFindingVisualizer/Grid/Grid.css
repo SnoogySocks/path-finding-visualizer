@@ -1,12 +1,17 @@
 .grid-container {
-  position: absolute;
+  /* position: absolute;
   top: 20px;
   right: 20px;
   bottom: 20px;
-  left: 20px;
+  left: 20px; */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: var(--darkest-blue);
+  padding: 20px;
 }
 
 .grid {
-  border: 2px red solid;
+  white-space: pre;
 }
