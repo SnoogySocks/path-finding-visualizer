@@ -17,3 +17,9 @@ export const NODE_STATE = {
     VISITED: "node-visited",
     WALL: "node-wall",
 }
+
+export const DELTA = [
+            [-1, 0],
+    [0, -1],        [0, 1],
+            [1, 0],
+]

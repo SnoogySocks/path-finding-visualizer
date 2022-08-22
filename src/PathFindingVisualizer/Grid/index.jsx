@@ -8,7 +8,7 @@ import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants.js"
 import Node from "../Node"
 import "./Grid.css";
 
-const Grid = () => {
+const Grid = ({isRunning}) => {
   const [grid, setGrid] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
 
@@ -22,7 +22,6 @@ const Grid = () => {
 
     return {
       row, col, state,
-      distance: Infinity,
     };
   }, []);
 
@@ -79,6 +78,17 @@ const Grid = () => {
   useEffect(() => {
     setGrid(initGrid());
   }, [initGrid, initNode])
+
+  // Run the algorithm
+  useEffect(() => {
+    // Stops the animation
+    if (!isRunning) {
+      
+    // Starts the animation
+    } else {
+      
+    }
+  }, [isRunning]);
 
   return (
     <div className="grid-container">

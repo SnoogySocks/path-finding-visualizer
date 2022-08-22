@@ -3,10 +3,11 @@ import React from 'react';
 // local imports
 import "./Toolbar.css";
 
-const ToolBar = () => {
+const ToolBar = ({isRunning, onVisualize}) => {
+  const playButtonText = isRunning ? "STOP" : "PLAY";
 
   return (<div className="tool-bar">
-    placeholder
+    <button onClick={onVisualize}>{playButtonText}</button>
   </div>);
 }
 
