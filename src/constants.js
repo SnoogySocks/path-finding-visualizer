@@ -1,8 +1,8 @@
 export const START_END_COORDS = { 
-    START_NODE_ROW: 23,
+    START_NODE_ROW: 3,
     START_NODE_COL: 10,
-    END_NODE_ROW: 30,
-    END_NODE_COL: 30,
+    END_NODE_ROW: 10,
+    END_NODE_COL: 40,
 }
 
 export const GRID_SIZE = {
@@ -12,8 +12,8 @@ export const GRID_SIZE = {
 
 export const NODE_STATE = {
     NONE: "",
-    FINISH: "node-finish",
     START: "node-start",
+    FINISH: "node-finish",
     VISITED: "node-visited",
     WALL: "node-wall",
 }
@@ -23,3 +23,5 @@ export const DELTA = [
     [0, -1],        [0, 1],
             [1, 0],
 ]
+
+export const ANIMATION_SPEED = 10;

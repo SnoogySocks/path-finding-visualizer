@@ -5,8 +5,11 @@ export const findShortestPath = (parents, end) => {
     // While current has a parent, go to its previousNode
     while (current) {
         shortestPath.push(current);
-        current = parents[current.row][current.column];
+        current = parents[current.row][current.col];
     }
 
-    return shortestPath.reverse();
+    shortestPath.pop();
+    shortestPath.reverse();
+    shortestPath.pop();
+    return shortestPath;
 }

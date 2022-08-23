@@ -3,7 +3,7 @@ import React from 'react';
 // local imports
 import "./Toolbar.css";
 
-const ToolBar = ({isRunning, onVisualize}) => {
+const ToolBar = ({isRunning, onVisualize, setAlgorithm}) => {
   const playButtonText = isRunning ? "STOP" : "PLAY";
 
   return (<div className="tool-bar">

@@ -1,29 +1,35 @@
 /* eslint-disable no-mixed-operators */
-import React, {useState, useEffect, useCallback} from "react";
-
-// files
-import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants.js"   
+import React, {useState, useEffect, useRef, useCallback} from "react";
 
 // local imports
+import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"   
 import Node from "../Node"
 import "./Grid.css";
 
-const Grid = ({isRunning}) => {
+const Grid = ({isRunning, algorithm, animationSpeed}) => {
   const [grid, setGrid] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
+  const [startCoords, setStartCoords] = useState({
+    row: START_END_COORDS.START_NODE_ROW, 
+    col: START_END_COORDS.START_NODE_COL
+  });
+  const [endCoords, setEndCoords] = useState({
+    row: START_END_COORDS.END_NODE_ROW, 
+    col: START_END_COORDS.END_NODE_COL
+  });
 
   const initNode = useCallback((row, col) => {
     let state = NODE_STATE.NONE;
-    if (row===START_END_COORDS.START_NODE_ROW && col===START_END_COORDS.START_NODE_COL) {
+    if (row===startCoords.row && col===startCoords.col) {
       state = NODE_STATE.START;
-    } else if (row===START_END_COORDS.END_NODE_ROW && col===START_END_COORDS.END_NODE_COL) {
+    } else if (row===endCoords.row && col===endCoords.col) {
       state = NODE_STATE.FINISH;
     }
 
     return {
       row, col, state,
     };
-  }, []);
+  }, [startCoords, endCoords]);
 
   const initGrid = useCallback(() => {
       let grid = new Array(GRID_SIZE.ROW_SIZE);
@@ -38,7 +44,7 @@ const Grid = ({isRunning}) => {
   }, [initNode]);
   
   // Create a new grid with grid[row][col] modified to value
-  let setNewGridCell = (row, col, value) => {
+  const setNewGridCell = (row, col, value) => {
     let newGrid = new Array(grid.length);
     for (let r = 0; r<grid.length; ++r) {
       newGrid[r] = [...grid[r]];
@@ -48,16 +54,19 @@ const Grid = ({isRunning}) => {
   }
 
   // Create a new grid with grid[row][col] toggled between a wall or none
-  let toggleNewGridWall = (row, col) => {
+  const toggleNewGridWall = (row, col) => {
     let value = {
       ...grid[row][col],
       state: grid[row][col].state===NODE_STATE.WALL ? NODE_STATE.NONE : NODE_STATE.WALL,
     };
     setGrid(setNewGridCell(row, col, value));
   }
-
+  
   // Start toggling cells between wall and none
   const handleMouseDown = (row, col) => {
+    if (isRunning 
+      || row===startCoords.row && col===startCoords.col
+      || row===endCoords.row && col===endCoords.col) return;
     setMouseIsPressed(true);
     toggleNewGridWall(row, col);
   }
@@ -69,7 +78,9 @@ const Grid = ({isRunning}) => {
 
   // Toggle the entered cell between a wall or none
   const handleMouseEnter = (row, col) => {
-    if (!mouseIsPressed
+    if (!mouseIsPressed || isRunning
+        || row===startCoords.row && col===startCoords.col
+        || row===endCoords.row && col===endCoords.col
         || grid[row][col].state!==NODE_STATE.WALL
         && grid[row][col].state!==NODE_STATE.NONE) return;
     toggleNewGridWall(row, col);
@@ -80,15 +91,32 @@ const Grid = ({isRunning}) => {
   }, [initGrid, initNode])
 
   // Run the algorithm
+  // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   useEffect(() => {
-    // Stops the animation
-    if (!isRunning) {
-      
-    // Starts the animation
-    } else {
-      
+    if (!isRunning) return;
+    const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
+    console.dir(shortestPath);
+
+    // Animate the steps to the algorithm
+    for (let i = 0; i<steps.length; ++i) {
+      setTimeout(() => {
+        if (!isRunning) return;
+        const {row, col} = steps[i];
+        document.getElementById(`node-${row}-${col}`)
+          .className = "node node-visited";
+      }, ANIMATION_SPEED*i*animationSpeed)
     }
-  }, [isRunning]);
+
+    // Animate the shortest path to finish
+    for (let i = 0; i<shortestPath.length; ++i) {
+      setTimeout(() => {
+        if (!isRunning) return;
+        const {row, col} = shortestPath[i];
+        document.getElementById(`node-${row}-${col}`)
+          .className = "node node-shortest-path";
+      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed)
+    }
+  }, [isRunning, grid, startCoords, algorithm, animationSpeed]);
 
   return (
     <div className="grid-container">

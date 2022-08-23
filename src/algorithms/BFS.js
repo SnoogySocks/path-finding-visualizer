@@ -18,11 +18,17 @@ export default class BFS {
         let distance = new Array(grid.length);
 
         for (let i = 0; i < grid.length; ++i) {
+            let parentsRow = new Array(grid[i].length);
+            let visitedRow = new Array(grid[i].length);
+            let distanceRow = new Array(grid[i].length);
             for (let j = 0; j<grid[i].length; ++j) {
-                visited[i][j] = false;
-                distance[i][j] = Infinity;
-                parents[i][j] = null;
+                parentsRow[j] = null;
+                visitedRow[j] = false;
+                distanceRow[j] = Infinity;
             }
+            parents[i] = parentsRow;
+            visited[i] = visitedRow;
+            distance[i] = distanceRow;
         }
 
         // Start fro the start node
@@ -51,6 +57,7 @@ export default class BFS {
                 if (grid[r][c].state!==NODE_STATE.FINISH) {
                     queue.push(grid[r][c]);
                 } else {
+                    steps.pop();
                     return {steps, shortestPath: findShortestPath(parents, grid[r][c])};
                 }
             }

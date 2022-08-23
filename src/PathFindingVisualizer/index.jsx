@@ -4,10 +4,12 @@ import React, {useState} from "react";
 import "./PathFindingVisualizer.css";
 import ToolBar from "./ToolBar";
 import Grid from "./Grid"
+import BFS from "../algorithms/BFS";
 
 const PathFindingVisualizer = () => {
   const [isRunning, setIsRunning] = useState(false);
-  // const [algorithm, setAlgorithm] = useState()
+  const [algorithm, setAlgorithm] = useState(new BFS());
+  const [animationSpeed, setAnimationSpeed] = useState(1);
 
   const toggleVisualizeAlgorithm = () => {
     setIsRunning(!isRunning);
@@ -19,10 +21,17 @@ const PathFindingVisualizer = () => {
         <ToolBar 
           isRunning={isRunning} 
           onVisualize={toggleVisualizeAlgorithm} 
+          algorithm={algorithm}
+          setAlgorithm={setAlgorithm}
+          setAnimationSpeed={setAnimationSpeed}
         />
       </div>
       <div className="content">
-        <Grid isRunning={isRunning} />
+        <Grid 
+          isRunning={isRunning}
+          algorithm={algorithm}
+          animationSpeed={animationSpeed}
+        />
       </div>
       <div className="footer">
         I hate css
