@@ -7,7 +7,7 @@ const Node = ({ row, col, state, onMouseDown, onMouseUp, onMouseEnter }) => {
         id={`node-${row}-${col}`}
         className={`node ${state}`}
         onMouseDown={() => onMouseDown(row, col)}
-        onMouseUp={() => onMouseUp(row, col)}
+        onMouseUp={onMouseUp}
         onMouseEnter={() => onMouseEnter(row, col)}
     />);
 }

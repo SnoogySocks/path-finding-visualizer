@@ -6,8 +6,10 @@ import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../co
 import Node from "../Node"
 import "./Grid.css";
 
-const Grid = ({isRunning, algorithm, animationSpeed}) => {
+const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const [grid, setGrid] = useState([]);
+  const [hasExecutedOnce, setHasExecutedOnce] = useState(false);
+  const [pendingTimeouts, setPendingTimeouts] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [startCoords, setStartCoords] = useState({
     row: START_END_COORDS.START_NODE_ROW, 
@@ -17,6 +19,7 @@ const Grid = ({isRunning, algorithm, animationSpeed}) => {
     row: START_END_COORDS.END_NODE_ROW, 
     col: START_END_COORDS.END_NODE_COL
   });
+
 
   const initNode = useCallback((row, col) => {
     let state = NODE_STATE.NONE;
@@ -61,7 +64,31 @@ const Grid = ({isRunning, algorithm, animationSpeed}) => {
     };
     setGrid(setNewGridCell(row, col, value));
   }
-  
+
+  const clearGrid = useCallback(() => {
+    for (let r = 0; r<grid.length; ++r) {
+      for (let c = 0; c<grid[r].length; ++c) {
+        const {row, col, state}= initNode(r, c);
+        document.getElementById(`node-${row}-${col}`)
+          .className = `node ${state}`;
+      }
+    }
+  }, [grid, initNode]);
+
+  const clearState = useCallback(statesToClear => {
+    for (let r = 0; r<grid.length; ++r) {
+      for (let c = 0; c < grid[r].length; ++c) {
+        const {row, col, state}= initNode(r, c);
+        const node = document.getElementById(`node-${row}-${col}`);
+        statesToClear.forEach(stateToClear => {
+          if (`node ${stateToClear}`===node.className) {
+            node.className = `node ${state}`;
+          }
+        });
+      }
+    }
+  }, [grid, initNode])
+
   // Start toggling cells between wall and none
   const handleMouseDown = (row, col) => {
     if (isRunning 
@@ -72,7 +99,7 @@ const Grid = ({isRunning, algorithm, animationSpeed}) => {
   }
 
   // Stop toggling cells between wall and none
-  const handleMouseUp = (row, col) => {
+  const handleMouseUp = () => {
     setMouseIsPressed(false);
   }
 
@@ -88,39 +115,67 @@ const Grid = ({isRunning, algorithm, animationSpeed}) => {
 
   useEffect(() => {
     setGrid(initGrid());
-  }, [initGrid, initNode])
+  }, [initGrid]);
 
   // Run the algorithm
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   useEffect(() => {
-    if (!isRunning) return;
+    // Clear the grid if animating but the user chose to stop
+    if (!isRunning && hasExecutedOnce) {
+      clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+      for (let i = 0; i<pendingTimeouts.length; ++i) {
+        clearTimeout(pendingTimeouts[i]);
+      }
+      return;
+    }
+    // Make the algorithm run only once at a time
+    else if (!isRunning || hasExecutedOnce) return;
+    
+    // Clear the grid and stop any previous animation
+    clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+    for (let i = 0; i<pendingTimeouts.length; ++i) {
+      clearTimeout(pendingTimeouts[i]);
+    }
+
     const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
-    console.dir(shortestPath);
+    const timeouts = [];
 
     // Animate the steps to the algorithm
     for (let i = 0; i<steps.length; ++i) {
-      setTimeout(() => {
-        if (!isRunning) return;
+      timeouts.push(setTimeout(() => {
         const {row, col} = steps[i];
         document.getElementById(`node-${row}-${col}`)
-          .className = "node node-visited";
-      }, ANIMATION_SPEED*i*animationSpeed)
+          .className = `node ${NODE_STATE.VISITED}`;
+      }, ANIMATION_SPEED*i*animationSpeed));
     }
 
     // Animate the shortest path to finish
     for (let i = 0; i<shortestPath.length; ++i) {
-      setTimeout(() => {
-        if (!isRunning) return;
+      timeouts.push(setTimeout(() => {
         const {row, col} = shortestPath[i];
         document.getElementById(`node-${row}-${col}`)
-          .className = "node node-shortest-path";
-      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed)
+          .className = `node ${NODE_STATE.SHORTEST_PATH}`;
+      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
     }
-  }, [isRunning, grid, startCoords, algorithm, animationSpeed]);
+
+    timeouts.push(setTimeout(() => {
+      setIsRunning(false);
+      setHasExecutedOnce(false);
+    }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
+
+    setPendingTimeouts(timeouts);
+    setHasExecutedOnce(true);
+  }, [
+    isRunning, setIsRunning, grid, startCoords, algorithm, 
+    animationSpeed, clearState, pendingTimeouts, hasExecutedOnce
+  ]);
+
+  // hasRun must be the same as isRunning
+  useEffect(() => setHasExecutedOnce(isRunning), [isRunning]);
 
   return (
     <div className="grid-container">
-      <div className="grid-table-container">
+      <div className="grid-table-container" onMouseUp={handleMouseUp}>
         <table>
           <tbody className="grid">
             {grid.map((row, rowIdx) => {
@@ -135,7 +190,7 @@ const Grid = ({isRunning, algorithm, animationSpeed}) => {
                     col={col}
                     state={state}
                     onMouseDown={(row, col) => handleMouseDown(row, col)}
-                    onMouseUp={(row, col) => handleMouseUp(row, col)}
+                    onMouseUp={handleMouseUp}
                     onMouseEnter={(row, col) => handleMouseEnter(row, col)}
                   />);
 

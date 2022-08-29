@@ -15,6 +15,7 @@ export const NODE_STATE = {
     START: "node-start",
     FINISH: "node-finish",
     VISITED: "node-visited",
+    SHORTEST_PATH: "node-shortest-path",
     WALL: "node-wall",
 }
 

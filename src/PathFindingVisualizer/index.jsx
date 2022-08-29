@@ -29,6 +29,7 @@ const PathFindingVisualizer = () => {
       <div className="content">
         <Grid 
           isRunning={isRunning}
+          setIsRunning={setIsRunning}
           algorithm={algorithm}
           animationSpeed={animationSpeed}
         />
