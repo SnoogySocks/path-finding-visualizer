@@ -1,5 +1,4 @@
 /* eslint-disable no-mixed-operators */
-import { hasSelectionSupport } from "@testing-library/user-event/dist/utils";
 import React, {useState, useEffect, useRef, useCallback} from "react";
 
 // local imports
@@ -9,16 +8,17 @@ import "./Grid.css";
 
 const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const [grid, setGrid] = useState([]);
-  const [hasExecutedOnce, setHasExecutedOnce] = useState(false);
-  const [pendingTimeouts, setPendingTimeouts] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
+  const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
+  const [hasDisplayedAlgorithm, setHasDisplayedAlgorithm] = useState(false);
   const [previousPressedCell, setPreviousPressedCell] = useState(null);
+  const [pendingAnimations, setPendingAnimation] = useState([]);
   const [startCoords, setStartCoords] = useState({
-    row: START_END_COORDS.START_NODE_ROW, 
+    row: START_END_COORDS.START_NODE_ROW,
     col: START_END_COORDS.START_NODE_COL
   });
   const [endCoords, setEndCoords] = useState({
-    row: START_END_COORDS.END_NODE_ROW, 
+    row: START_END_COORDS.END_NODE_ROW,
     col: START_END_COORDS.END_NODE_COL
   });
 
@@ -38,7 +38,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if (row===startCoords.row && col===startCoords.col) {
       state = NODE_STATE.START;
     } else if (row===endCoords.row && col===endCoords.col) {
-      state = NODE_STATE.FINISH;
+      state = NODE_STATE.END;
     }
 
     return {
@@ -92,22 +92,28 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
   // Takes a list of states to clear from the grid
   const clearState = useCallback(statesToClear => {
+    let hasToggled = false;
+
     for (let r = 0; r<grid.length; ++r) {
       for (let c = 0; c < grid[r].length; ++c) {
         const {row, col}= initNode(r, c);
         const node = document.getElementById(`node-${row}-${col}`);
-        statesToClear.forEach(stateToClear => {
+        
+        for (let stateToClear of statesToClear) {
           if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className) {
             node.className = toggleReverseState(node.className);
+            hasToggled = true;
           }
-        });
+        }
       }
     }
+
+    return hasToggled;
   }, [grid, initNode]);
 
   // Start toggling cells between wall and none
   const handleMouseDown = (row, col) => {
-    if (isRunning 
+    if (isRunning || hasDisplayedAlgorithm
         || grid[row][col].state!==NODE_STATE.WALL
         && grid[row][col].state!==NODE_STATE.WALL_REVERSE
         && grid[row][col].state!=="") return;
@@ -124,6 +130,8 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   // Toggle the entered cell between a wall or none
   const handleMouseEnter = (row, col) => {
     if (!mouseIsPressed || isRunning 
+        // There's a bug that registers 2 enters in a square when you enter 
+        // only once. So this prevents that.
         || previousPressedCell.row===row && previousPressedCell.col===col
         || grid[row][col].state!==NODE_STATE.WALL
         && grid[row][col].state!==NODE_STATE.WALL_REVERSE
@@ -140,61 +148,71 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   useEffect(() => { (async function() {
     // Clear the animation if animating but the user aborted
-    if (!isRunning && hasExecutedOnce) {
+    if (!isRunning && hasProcessedSteps) {
       clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-      for (let i = 0; i<pendingTimeouts.length; ++i) {
-        clearTimeout(pendingTimeouts[i]);
+      for (let i = 0; i<pendingAnimations.length; ++i) {
+        clearTimeout(pendingAnimations[i]);
       }
+      
+      setHasDisplayedAlgorithm(false);
+      setHasProcessedSteps(false);
       return;
     }
     // Make the algorithm run only once at a time
-    else if (!isRunning || hasExecutedOnce) return;
+    else if (!isRunning || hasProcessedSteps) return;
+
+    console.log("has run");
     
     // Clear the grid and stop any previous animation
-    clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+    const hasDisplayedAlgo = clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
 
     // Sleep for the animation time (1.5s)
-    await new Promise(r => setTimeout(r, 1500));
+    // Only sleep when there are toggled nodes
+    if (hasDisplayedAlgo) {
+      await new Promise(r => setTimeout(r, 1500));
+    }
 
-    for (let i = 0; i<pendingTimeouts.length; ++i) {
-      clearTimeout(pendingTimeouts[i]);
+    for (let i = 0; i<pendingAnimations.length; ++i) {
+      clearTimeout(pendingAnimations[i]);
     }
 
     const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
-    const timeouts = [];
+    const animations = [];
 
     // Animate the steps to the algorithm
     for (let i = 0; i<steps.length; ++i) {
-      timeouts.push(setTimeout(() => {
+      animations.push(setTimeout(() => {
         const {row, col} = steps[i];
         document.getElementById(`node-${row}-${col}`)
           .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.VISITED}`;
       }, ANIMATION_SPEED*i*animationSpeed));
     }
 
-    // Animate the shortest path to finish
+    // Animate the shortest path to end
     for (let i = 0; i<shortestPath.length; ++i) {
-      timeouts.push(setTimeout(() => {
+      animations.push(setTimeout(() => {
         const {row, col} = shortestPath[i];
         document.getElementById(`node-${row}-${col}`)
           .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.SHORTEST_PATH}`;
       }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
     }
 
-    timeouts.push(setTimeout(() => {
+    animations.push(setTimeout(() => {
       setIsRunning(false);
-      setHasExecutedOnce(false);
+      setHasProcessedSteps(false);
     }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
 
-    setPendingTimeouts(timeouts);
-    setHasExecutedOnce(true);
+    setPendingAnimation(animations);
+    setHasDisplayedAlgorithm(true);
+    setHasProcessedSteps(true);
   })(); }, [
     isRunning, setIsRunning, grid, startCoords, algorithm, 
-    animationSpeed, clearState, pendingTimeouts, hasExecutedOnce
+    animationSpeed, clearState, pendingAnimations, hasProcessedSteps,
+    hasDisplayedAlgorithm
   ]);
 
-  // hasRun must be the same as isRunning
-  useEffect(() => setHasExecutedOnce(isRunning), [isRunning]);
+  // hasProcessedSteps must be the same as isRunning
+  useEffect(() => setHasProcessedSteps(isRunning), [isRunning]);
 
   return (
     <div className="grid-container">
@@ -205,8 +223,8 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
               return (<tr key={rowIdx}>
                 {row.map((node, nodeIdx) => {
-                  const {row, col, state} = node;
 
+                  const {row, col, state} = node;
                   return (<Node 
                     key={nodeIdx}
                     row={row}

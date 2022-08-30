@@ -13,7 +13,7 @@ export const GRID_SIZE = {
 export const NODE_STATE = {
     DEFAULT: "node",
     START: "node-start",
-    FINISH: "node-finish",
+    END: "node-end",
     VISITED: "node-visited",
     VISITED_REVERSE: "node-visited-reverse",
     SHORTEST_PATH: "node-shortest-path",

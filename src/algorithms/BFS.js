@@ -54,7 +54,7 @@ export default class BFS {
                 // previousNode is a parent node to grid[r][c]
                 parents[r][c] = previousNode;
                 
-                if (grid[r][c].state!==NODE_STATE.FINISH) {
+                if (grid[r][c].state!==NODE_STATE.END) {
                     queue.push(grid[r][c]);
                 } else {
                     steps.pop();
