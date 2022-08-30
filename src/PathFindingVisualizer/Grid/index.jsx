@@ -134,59 +134,57 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
   // Animate the algorithm
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
-  useEffect(() => {
-    (async function() {
-      // Clear the animation if animating but the user aborted
-      if (!isRunning && hasExecutedOnce) {
-        clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-        for (let i = 0; i<pendingTimeouts.length; ++i) {
-          clearTimeout(pendingTimeouts[i]);
-        }
-        return;
-      }
-      // Make the algorithm run only once at a time
-      else if (!isRunning || hasExecutedOnce) return;
-      
-      // Clear the grid and stop any previous animation
+  useEffect(() => { (async function() {
+    // Clear the animation if animating but the user aborted
+    if (!isRunning && hasExecutedOnce) {
       clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-
-      // Sleep for the animation time (1.5s)
-      await new Promise(r => setTimeout(r, 1500));
-
       for (let i = 0; i<pendingTimeouts.length; ++i) {
         clearTimeout(pendingTimeouts[i]);
       }
+      return;
+    }
+    // Make the algorithm run only once at a time
+    else if (!isRunning || hasExecutedOnce) return;
+    
+    // Clear the grid and stop any previous animation
+    clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
 
-      const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
-      const timeouts = [];
+    // Sleep for the animation time (1.5s)
+    await new Promise(r => setTimeout(r, 1500));
 
-      // Animate the steps to the algorithm
-      for (let i = 0; i<steps.length; ++i) {
-        timeouts.push(setTimeout(() => {
-          const {row, col} = steps[i];
-          document.getElementById(`node-${row}-${col}`)
-            .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.VISITED}`;
-        }, ANIMATION_SPEED*i*animationSpeed));
-      }
+    for (let i = 0; i<pendingTimeouts.length; ++i) {
+      clearTimeout(pendingTimeouts[i]);
+    }
 
-      // Animate the shortest path to finish
-      for (let i = 0; i<shortestPath.length; ++i) {
-        timeouts.push(setTimeout(() => {
-          const {row, col} = shortestPath[i];
-          document.getElementById(`node-${row}-${col}`)
-            .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.SHORTEST_PATH}`;
-        }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
-      }
+    const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
+    const timeouts = [];
 
+    // Animate the steps to the algorithm
+    for (let i = 0; i<steps.length; ++i) {
       timeouts.push(setTimeout(() => {
-        setIsRunning(false);
-        setHasExecutedOnce(false);
-      }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
+        const {row, col} = steps[i];
+        document.getElementById(`node-${row}-${col}`)
+          .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.VISITED}`;
+      }, ANIMATION_SPEED*i*animationSpeed));
+    }
 
-      setPendingTimeouts(timeouts);
-      setHasExecutedOnce(true);
-    })();
-  }, [
+    // Animate the shortest path to finish
+    for (let i = 0; i<shortestPath.length; ++i) {
+      timeouts.push(setTimeout(() => {
+        const {row, col} = shortestPath[i];
+        document.getElementById(`node-${row}-${col}`)
+          .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.SHORTEST_PATH}`;
+      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
+    }
+
+    timeouts.push(setTimeout(() => {
+      setIsRunning(false);
+      setHasExecutedOnce(false);
+    }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
+
+    setPendingTimeouts(timeouts);
+    setHasExecutedOnce(true);
+  })(); }, [
     isRunning, setIsRunning, grid, startCoords, algorithm, 
     animationSpeed, clearState, pendingTimeouts, hasExecutedOnce
   ]);
@@ -197,7 +195,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   return (
     <div className="grid-container">
       <div className="grid-table-container" onMouseUp={handleMouseUp}>
-        <table>
+        <table cellSpacing="0">
           <tbody className="grid">
             {grid.map((row, rowIdx) => {
 

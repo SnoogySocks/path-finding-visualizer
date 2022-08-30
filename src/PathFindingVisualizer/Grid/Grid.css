@@ -13,8 +13,12 @@
 }
 
 .grid-container table {
-  outline: 5px solid #355871;
-  padding: 2px;
+  outline: 5px solid var(--pale-blue);
+  padding: 4px;
+}
+
+.grid-container th,td {
+  border: 1px solid var(--pale-blue);
 }
 
 .grid {

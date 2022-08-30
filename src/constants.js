@@ -7,7 +7,7 @@ export const START_END_COORDS = {
 
 export const GRID_SIZE = {
     ROW_SIZE: 22,
-    COL_SIZE: 50,
+    COL_SIZE: 45,
 }
 
 export const NODE_STATE = {

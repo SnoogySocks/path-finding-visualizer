@@ -1,7 +1,6 @@
 .node {
   width: 25px;
   height: 25px;
-  outline: 1px solid #355871;
   display: inline-block;
 }
 
@@ -93,7 +92,9 @@
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
   animation-play-state: running;
-  background-color: rgb(12, 53, 71);
+  /* background-color: rgb(12, 53, 71); */
+  background-color: var(--pale-blue);
+
 }
 
 @keyframes wallAnimation {
@@ -122,15 +123,15 @@
 @keyframes wallAnimationReverse {
   0% {
     transform: scale(1);
-    background-color: rgb(12, 53, 71);
+    background-color: var(--pale-blue);
   }
   33% {
     transform: scale(1.2);
-    background-color: rgb(12, 53, 71);
+    background-color: var(--pale-blue);
   }
   66% {
     transform: scale(0.3);
-    background-color: rgb(12, 53, 71);
+    background-color: var(--pale-blue);
   }
   100% {
     transform: scale(1);
