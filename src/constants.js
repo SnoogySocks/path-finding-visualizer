@@ -2,12 +2,12 @@ export const START_END_COORDS = {
     START_NODE_ROW: 3,
     START_NODE_COL: 10,
     END_NODE_ROW: 10,
-    END_NODE_COL: 40,
+    END_NODE_COL: 30,
 }
 
 export const GRID_SIZE = {
-    ROW_SIZE: 22,
-    COL_SIZE: 45,
+    ROW_SIZE: 20,
+    COL_SIZE: 50,
 }
 
 export const NODE_STATE = {
@@ -28,4 +28,7 @@ export const DELTA = [
             [1, 0],
 ]
 
-export const ANIMATION_SPEED = 10;
+export const ANIMATION_SPEED = {
+    STEPS: 10,
+    SHORTEST_PATH: 50,
+}

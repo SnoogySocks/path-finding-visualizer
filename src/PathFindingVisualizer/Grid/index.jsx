@@ -161,8 +161,6 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     // Make the algorithm run only once at a time
     else if (!isRunning || hasProcessedSteps) return;
 
-    console.log("has run");
-    
     // Clear the grid and stop any previous animation
     const hasDisplayedAlgo = clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
 
@@ -185,7 +183,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         const {row, col} = steps[i];
         document.getElementById(`node-${row}-${col}`)
           .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.VISITED}`;
-      }, ANIMATION_SPEED*i*animationSpeed));
+      }, ANIMATION_SPEED.STEPS*i*animationSpeed));
     }
 
     // Animate the shortest path to end
@@ -194,13 +192,13 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         const {row, col} = shortestPath[i];
         document.getElementById(`node-${row}-${col}`)
           .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.SHORTEST_PATH}`;
-      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
+      }, (ANIMATION_SPEED.SHORTEST_PATH*i+ANIMATION_SPEED.STEPS*steps.length)*animationSpeed));
     }
 
     animations.push(setTimeout(() => {
       setIsRunning(false);
       setHasProcessedSteps(false);
-    }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
+    }, (ANIMATION_SPEED.STEPS*steps.length+ANIMATION_SPEED.SHORTEST_PATH*shortestPath.length)*animationSpeed));
 
     setPendingAnimation(animations);
     setHasDisplayedAlgorithm(true);
