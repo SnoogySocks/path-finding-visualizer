@@ -69,9 +69,12 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
   // Create a new grid with grid[row][col] toggled between a wall or none
   const toggleNewGridWall = (row, col) => {
+    let toggledWall = grid[row][col].state===NODE_STATE.WALL 
+      ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
     let value = {
       ...grid[row][col],
-      state: grid[row][col].state===NODE_STATE.WALL ? "" : NODE_STATE.WALL,
+      state: toggleReverseState(`${NODE_STATE.DEFAULT} ${toggledWall}`)
+        .substring(NODE_STATE.DEFAULT.length+1),
     };
     setGrid(setNewGridCell(row, col, value));
   }
@@ -105,6 +108,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const handleMouseDown = (row, col) => {
     if (isRunning 
         || grid[row][col].state!==NODE_STATE.WALL
+        && grid[row][col].state!==NODE_STATE.WALL_REVERSE
         && grid[row][col].state!=="") return;
     setMouseIsPressed(true);
     toggleNewGridWall(row, col);
@@ -119,6 +123,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const handleMouseEnter = (row, col) => {
     if (!mouseIsPressed || isRunning
         || grid[row][col].state!==NODE_STATE.WALL
+        && grid[row][col].state!==NODE_STATE.WALL_REVERSE
         && grid[row][col].state!=="") return;
     toggleNewGridWall(row, col);
   }
