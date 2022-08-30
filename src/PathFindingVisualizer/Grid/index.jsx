@@ -1,4 +1,5 @@
 /* eslint-disable no-mixed-operators */
+import { hasSelectionSupport } from "@testing-library/user-event/dist/utils";
 import React, {useState, useEffect, useRef, useCallback} from "react";
 
 // local imports
@@ -20,9 +21,19 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     col: START_END_COORDS.END_NODE_COL
   });
 
+  const toggleReverseState = state => {
+    const newState = state.substring(NODE_STATE.DEFAULT.length+1);
+    if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {
+      return `${state}-reverse`;
+    } else if ([NODE_STATE.VISITED_REVERSE, NODE_STATE.SHORTEST_PATH_REVERSE,
+        NODE_STATE.WALL_REVERSE].includes(newState)) {
+      return state.substring(0, state.length-"-reverse".length);
+    }
+    return state;
+  }
 
   const initNode = useCallback((row, col) => {
-    let state = NODE_STATE.NONE;
+    let state = "";
     if (row===startCoords.row && col===startCoords.col) {
       state = NODE_STATE.START;
     } else if (row===endCoords.row && col===endCoords.col) {
@@ -60,7 +71,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const toggleNewGridWall = (row, col) => {
     let value = {
       ...grid[row][col],
-      state: grid[row][col].state===NODE_STATE.WALL ? NODE_STATE.NONE : NODE_STATE.WALL,
+      state: grid[row][col].state===NODE_STATE.WALL ? "" : NODE_STATE.WALL,
     };
     setGrid(setNewGridCell(row, col, value));
   }
@@ -70,30 +81,31 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       for (let c = 0; c<grid[r].length; ++c) {
         const {row, col, state}= initNode(r, c);
         document.getElementById(`node-${row}-${col}`)
-          .className = `node ${state}`;
+          .className = `${NODE_STATE.DEFAULT} ${state}`;
       }
     }
   }, [grid, initNode]);
 
+  // Takes a list of states to clear from the grid
   const clearState = useCallback(statesToClear => {
     for (let r = 0; r<grid.length; ++r) {
       for (let c = 0; c < grid[r].length; ++c) {
-        const {row, col, state}= initNode(r, c);
+        const {row, col}= initNode(r, c);
         const node = document.getElementById(`node-${row}-${col}`);
         statesToClear.forEach(stateToClear => {
-          if (`node ${stateToClear}`===node.className) {
-            node.className = `node ${state}`;
+          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className) {
+            node.className = toggleReverseState(node.className);
           }
         });
       }
     }
-  }, [grid, initNode])
+  }, [grid, initNode]);
 
   // Start toggling cells between wall and none
   const handleMouseDown = (row, col) => {
     if (isRunning 
-      || row===startCoords.row && col===startCoords.col
-      || row===endCoords.row && col===endCoords.col) return;
+        || grid[row][col].state!==NODE_STATE.WALL
+        && grid[row][col].state!=="") return;
     setMouseIsPressed(true);
     toggleNewGridWall(row, col);
   }
@@ -106,10 +118,8 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   // Toggle the entered cell between a wall or none
   const handleMouseEnter = (row, col) => {
     if (!mouseIsPressed || isRunning
-        || row===startCoords.row && col===startCoords.col
-        || row===endCoords.row && col===endCoords.col
         || grid[row][col].state!==NODE_STATE.WALL
-        && grid[row][col].state!==NODE_STATE.NONE) return;
+        && grid[row][col].state!=="") return;
     toggleNewGridWall(row, col);
   }
 
@@ -117,54 +127,60 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  // Run the algorithm
+  // Animate the algorithm
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   useEffect(() => {
-    // Clear the grid if animating but the user chose to stop
-    if (!isRunning && hasExecutedOnce) {
+    (async function() {
+      // Clear the animation if animating but the user aborted
+      if (!isRunning && hasExecutedOnce) {
+        clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+        for (let i = 0; i<pendingTimeouts.length; ++i) {
+          clearTimeout(pendingTimeouts[i]);
+        }
+        return;
+      }
+      // Make the algorithm run only once at a time
+      else if (!isRunning || hasExecutedOnce) return;
+      
+      // Clear the grid and stop any previous animation
       clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+
+      // Sleep for the animation time (1.5s)
+      await new Promise(r => setTimeout(r, 1500));
+
       for (let i = 0; i<pendingTimeouts.length; ++i) {
         clearTimeout(pendingTimeouts[i]);
       }
-      return;
-    }
-    // Make the algorithm run only once at a time
-    else if (!isRunning || hasExecutedOnce) return;
-    
-    // Clear the grid and stop any previous animation
-    clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-    for (let i = 0; i<pendingTimeouts.length; ++i) {
-      clearTimeout(pendingTimeouts[i]);
-    }
 
-    const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
-    const timeouts = [];
+      const {steps, shortestPath} = algorithm.run(grid, grid[startCoords.row][startCoords.col]);
+      const timeouts = [];
 
-    // Animate the steps to the algorithm
-    for (let i = 0; i<steps.length; ++i) {
+      // Animate the steps to the algorithm
+      for (let i = 0; i<steps.length; ++i) {
+        timeouts.push(setTimeout(() => {
+          const {row, col} = steps[i];
+          document.getElementById(`node-${row}-${col}`)
+            .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.VISITED}`;
+        }, ANIMATION_SPEED*i*animationSpeed));
+      }
+
+      // Animate the shortest path to finish
+      for (let i = 0; i<shortestPath.length; ++i) {
+        timeouts.push(setTimeout(() => {
+          const {row, col} = shortestPath[i];
+          document.getElementById(`node-${row}-${col}`)
+            .className = `${NODE_STATE.DEFAULT} ${NODE_STATE.SHORTEST_PATH}`;
+        }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
+      }
+
       timeouts.push(setTimeout(() => {
-        const {row, col} = steps[i];
-        document.getElementById(`node-${row}-${col}`)
-          .className = `node ${NODE_STATE.VISITED}`;
-      }, ANIMATION_SPEED*i*animationSpeed));
-    }
+        setIsRunning(false);
+        setHasExecutedOnce(false);
+      }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
 
-    // Animate the shortest path to finish
-    for (let i = 0; i<shortestPath.length; ++i) {
-      timeouts.push(setTimeout(() => {
-        const {row, col} = shortestPath[i];
-        document.getElementById(`node-${row}-${col}`)
-          .className = `node ${NODE_STATE.SHORTEST_PATH}`;
-      }, ANIMATION_SPEED*(i+steps.length)*animationSpeed));
-    }
-
-    timeouts.push(setTimeout(() => {
-      setIsRunning(false);
-      setHasExecutedOnce(false);
-    }, (steps.length+shortestPath.length)*ANIMATION_SPEED*animationSpeed));
-
-    setPendingTimeouts(timeouts);
-    setHasExecutedOnce(true);
+      setPendingTimeouts(timeouts);
+      setHasExecutedOnce(true);
+    })();
   }, [
     isRunning, setIsRunning, grid, startCoords, algorithm, 
     animationSpeed, clearState, pendingTimeouts, hasExecutedOnce

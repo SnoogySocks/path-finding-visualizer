@@ -11,12 +11,15 @@ export const GRID_SIZE = {
 }
 
 export const NODE_STATE = {
-    NONE: "",
+    DEFAULT: "node",
     START: "node-start",
     FINISH: "node-finish",
     VISITED: "node-visited",
+    VISITED_REVERSE: "node-visited-reverse",
     SHORTEST_PATH: "node-shortest-path",
+    SHORTEST_PATH_REVERSE: "node-shortest-path-reverse",
     WALL: "node-wall",
+    WALL_REVERSE: "node-wall-reverse",
 }
 
 export const DELTA = [

@@ -4,7 +4,7 @@ import React from 'react';
 import "./Toolbar.css";
 
 const ToolBar = ({isRunning, onVisualize, setAlgorithm}) => {
-  const playButtonText = isRunning ? "STOP" : "PLAY";
+  const playButtonText = isRunning ? "ABORT" : "PLAY";
 
   return (<div className="tool-bar">
     <button onClick={onVisualize}>{playButtonText}</button>
