@@ -12,6 +12,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const [hasExecutedOnce, setHasExecutedOnce] = useState(false);
   const [pendingTimeouts, setPendingTimeouts] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
+  const [previousPressedCell, setPreviousPressedCell] = useState(null);
   const [startCoords, setStartCoords] = useState({
     row: START_END_COORDS.START_NODE_ROW, 
     col: START_END_COORDS.START_NODE_COL
@@ -111,6 +112,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         && grid[row][col].state!==NODE_STATE.WALL_REVERSE
         && grid[row][col].state!=="") return;
     setMouseIsPressed(true);
+    setPreviousPressedCell(grid[row][col]);
     toggleNewGridWall(row, col);
   }
 
@@ -121,10 +123,12 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
   // Toggle the entered cell between a wall or none
   const handleMouseEnter = (row, col) => {
-    if (!mouseIsPressed || isRunning
+    if (!mouseIsPressed || isRunning 
+        || previousPressedCell.row===row && previousPressedCell.col===col
         || grid[row][col].state!==NODE_STATE.WALL
         && grid[row][col].state!==NODE_STATE.WALL_REVERSE
         && grid[row][col].state!=="") return;
+    setPreviousPressedCell(grid[row][col]);
     toggleNewGridWall(row, col);
   }
 
