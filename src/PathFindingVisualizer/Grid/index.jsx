@@ -1,8 +1,8 @@
 /* eslint-disable no-mixed-operators */
-import React, {useState, useEffect, useRef, useCallback} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 
 // local imports
-import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED, DELTA} from "../../constants"   
+import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"
 import Node from "../Node"
 import "./Grid.css";
 
@@ -52,7 +52,6 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     } else if (node===NODE_STATE.END) {
       state = NODE_STATE.END;
     }
-
     return {
       row, col, state,
     };
@@ -87,7 +86,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
 
   // Create a new grid with grid[row][col] toggled between a wall or none
   const toggleNewGridWall = (row, col) => {
-    let toggledWall = grid[row][col].state===NODE_STATE.WALL 
+    let toggledWall = grid[row][col].state===NODE_STATE.WALL
       ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
     let value = {
       ...grid[row][col],
@@ -105,7 +104,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       for (let c = 0; c < grid[r].length; ++c) {
         const {row, col} = initNodeFromDOM(r, c);
         const node = document.getElementById(`node-${row}-${col}`);
-        
+
         for (let stateToClear of statesToClear) {
           if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className) {
             node.className = toggleReverseState(node.className);
@@ -123,7 +122,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if (hasDisplayedAlgorithm) return;
     if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state)) {
       setDraggedNode(grid[row][col]);
-      
+
       // Will remove the og start/end node
       setPreviousNode({...grid[row][col], state: ""});
 
@@ -140,7 +139,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     // Set the new start/end node position
     if (draggedNode) {
       setGrid(setNewGridCell(draggedNode));
-      
+
       if (draggedNode.state===NODE_STATE.START) {
         setStartNode({row: draggedNode.row, col: draggedNode.col});
       }
@@ -156,6 +155,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       // Case start and end node overlap, don't move the draggedNode
       if ([draggedNode.state, grid[row][col].state].includes(NODE_STATE.START)
           && [draggedNode.state, grid[row][col].state].includes(NODE_STATE.END)) {
+        setCell(draggedNode);
         return;
       }
 
@@ -163,13 +163,17 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       const newDraggedNode = {row: row, col: col, state: draggedNode.state};
       setDraggedNode(newDraggedNode);
       setCell(newDraggedNode);
+
+      // Remove the previous node and update it to the current node
+      // ! case it went over a start/end node previously, this removes the copy
+      setCell(previousNode);
       setPreviousNode(grid[row][col]);
-      
+
     // Toggle the entered cell between a wall or none
-    } else if (mouseIsPressed && !isRunning 
+    } else if (mouseIsPressed && !isRunning
         && grid[row][col].state!==NODE_STATE.START
         && grid[row][col].state!==NODE_STATE.END
-        // There's a bug that registers 2 enters in a square when you enter 
+        // There's a bug that registers 2 enters in a square when you enter
         // only once. So this prevents that.
         && (previousNode.row!==row || previousNode.col!==col)) {
       toggleNewGridWall(row, col);
@@ -182,7 +186,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if (!draggedNode) return;
     // if start, then end else start
     let oppositeSide = draggedNode.state===NODE_STATE.START ? NODE_STATE.END : NODE_STATE.START;
-    
+
     // don't remove previous node if it's START or END
     if (grid[row][col].state!==oppositeSide) {
       setCell({...grid[row][col], state: ""});
@@ -202,7 +206,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       for (let i = 0; i<pendingAnimations.length; ++i) {
         clearTimeout(pendingAnimations[i]);
       }
-      
+
       setHasDisplayedAlgorithm(false);
       setHasProcessedSteps(false);
       return;
@@ -249,7 +253,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     setHasDisplayedAlgorithm(true);
     setHasProcessedSteps(true);
   })(); }, [
-    isRunning, setIsRunning, grid, algorithm, 
+    isRunning, setIsRunning, grid, algorithm,
     animationSpeed, clearState, pendingAnimations, hasProcessedSteps,
     hasDisplayedAlgorithm, startNode
   ]);
@@ -268,7 +272,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
                 {row.map((node, nodeIdx) => {
 
                   const {row, col, state} = node;
-                  return (<Node 
+                  return (<Node
                     key={nodeIdx}
                     row={row}
                     col={col}
