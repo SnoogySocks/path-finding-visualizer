@@ -167,7 +167,14 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       // Remove the previous node and update it to the current node
       // ! case it went over a start/end node previously, this removes the copy
       setGrid(setNewGridCell(previousNode));
-      setPreviousNode(grid[row][col]);
+      setCell(previousNode);
+
+      // If there is a reverse at the end, remove it
+      if (grid[row][col].state.includes("reverse")) {
+        setPreviousNode({...grid[row][col], state: ""});
+      } else {
+        setPreviousNode(grid[row][col]);
+      }
 
     // Toggle the entered cell between a wall or none
     } else if (mouseIsPressed && !isRunning
@@ -226,8 +233,6 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     for (let i = 0; i<pendingAnimations.length; ++i) {
       clearTimeout(pendingAnimations[i]);
     }
-
-    console.log(grid);
 
     const {steps, shortestPath} = algorithm.run(grid, startNode);
     const animations = [];
