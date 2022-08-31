@@ -13,7 +13,7 @@ export default class BFS {
     run (grid, start) {
         let steps = [];
         let parents = new Array(grid.length);
-        
+
         let visited = new Array(grid.length);
         let distance = new Array(grid.length);
 
@@ -45,7 +45,7 @@ export default class BFS {
                 if (r<0 || grid.length<=r || c<0 || grid[r].length<=c
                     || grid[r][c].state===NODE_STATE.WALL
                     || visited[r][c]) continue;
-                
+
                 // Record all the visited nodes in the algorithm
                 steps.push(grid[r][c]);
                 visited[r][c] = true;
@@ -53,7 +53,7 @@ export default class BFS {
                 distance[r][c] = distance[previousNode.row][previousNode.col]+1;
                 // previousNode is a parent node to grid[r][c]
                 parents[r][c] = previousNode;
-                
+
                 if (grid[r][c].state!==NODE_STATE.END) {
                     queue.push(grid[r][c]);
                 } else {
