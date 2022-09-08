@@ -18,16 +18,16 @@ const PathFindingVisualizer = () => {
   return (
     <div className="screen-container">
       <div className="header">
-        <ToolBar 
-          isRunning={isRunning} 
-          onVisualize={toggleVisualizeAlgorithm} 
+        <ToolBar
+          isRunning={isRunning}
+          onVisualize={toggleVisualizeAlgorithm}
           algorithm={algorithm}
           setAlgorithm={setAlgorithm}
           setAnimationSpeed={setAnimationSpeed}
         />
       </div>
       <div className="content">
-        <Grid 
+        <Grid
           isRunning={isRunning}
           setIsRunning={setIsRunning}
           algorithm={algorithm}

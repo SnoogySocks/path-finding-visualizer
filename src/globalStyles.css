@@ -11,9 +11,6 @@
   --darkest-blue: #131c21;
 }
 
-* {
-}
-
 html, body, #root {
   height: 100%;
 }
