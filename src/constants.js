@@ -20,7 +20,6 @@ export const NODE_STATE = {
     SHORTEST_PATH_REVERSE: "node-shortest-path-reverse",
     WALL: "node-wall",
     WALL_REVERSE: "node-wall-reverse",
-    NO_ANIMATION: "no-animation",
 }
 
 export const DELTA = [

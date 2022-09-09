@@ -13,21 +13,21 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const [hasDisplayedAlgorithm, setHasDisplayedAlgorithm] = useState(false);
   const [previousNode, setPreviousNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
-  const [pendingAnimations, setPendingAnimation] = useState([]);
+  const [pendingAnimations, setPendingAnimations] = useState([]);
   const [startNode, setStartNode] = useState({
     row: START_END_COORDS.START_NODE_ROW,
     col: START_END_COORDS.START_NODE_COL,
   });
 
   const toggleReverseState = state => {
-    const newState = state.substring(NODE_STATE.DEFAULT.length+1);
+    const newState = state.split(" ")[1];
     if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {
-      return `${state}-reverse`;
+      return `${NODE_STATE.DEFAULT} ${newState}-reverse`;
     } else if ([NODE_STATE.VISITED_REVERSE, NODE_STATE.SHORTEST_PATH_REVERSE,
         NODE_STATE.WALL_REVERSE].includes(newState)) {
-      return state.substring(0, state.length-"-reverse".length);
+      return `${NODE_STATE.DEFAULT} ${newState.substring(0, newState.length-"-reverse".length)}`;
     }
-    return state;
+    return NODE_STATE.DEFAULT;
   }
 
   const initNode = useCallback((row, col) => {
@@ -70,27 +70,18 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   }, [initNode]);
 
   // Create a new grid with grid[row][col] modified to value
-  const setNewGridCell = node => {
+  const setNewGridCell = useCallback(node => {
     let newGrid = new Array(grid.length);
     for (let r = 0; r<grid.length; ++r) {
       newGrid[r] = [...grid[r]];
     }
     newGrid[node.row][node.col] = node;
     return newGrid;
-  }
+  }, [grid]);
 
   const setCellDOM = node => {
     document.getElementById(`node-${node.row}-${node.col}`)
       .className = `${NODE_STATE.DEFAULT} ${node.state}`;
-  }
-
-  const setCell = node => {
-    if (!node) return;
-    setGrid(setNewGridCell(node));
-
-    if (node.state===NODE_STATE.START) {
-      setStartNode({row: node.row, col: node.col});
-    }
   }
 
   // Create a new grid with grid[row][col] toggled between a wall or none
@@ -115,9 +106,9 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         const node = document.getElementById(`node-${row}-${col}`);
 
         for (let stateToClear of statesToClear) {
-          console.log(`${NODE_STATE.DEFAULT} ${stateToClear}`+"###"+node.className.trimEnd());
-          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className.trimEnd()) {
-            node.className = toggleReverseState(node.className.trimEnd());
+          // console.log(`${NODE_STATE.DEFAULT} ${stateToClear}`+"###"+node.className.trimEnd());
+          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className) {
+            node.className = toggleReverseState(node.className);
             hasToggled = true;
           }
         }
@@ -127,9 +118,21 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     return hasToggled;
   }, [grid, initNodeFromDOM]);
 
+  // Clear state and states that prevent grid interaction after visualization
+  const clearCache = useCallback(statesToClear => {
+    clearState(statesToClear);
+    for (let i = 0; i<pendingAnimations.length; ++i) {
+      clearTimeout(pendingAnimations[i]);
+    }
+
+    setHasDisplayedAlgorithm(false);
+    setHasProcessedSteps(false);
+    setPendingAnimations([]);
+  }, [clearState, pendingAnimations]);
+
   // visualize the algorithm on the grid
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
-  const visualizeAlgorithm = useCallback(async isInstant => {
+  const visualizeAlgorithm = useCallback(async () => {
     // Clear the grid and stop any previous animation
     const hasDisplayedAlgo = clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
 
@@ -142,23 +145,20 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     const {steps, shortestPath} = algorithm.run(grid, startNode);
     const animations = [];
 
-    const instantFactor = isInstant ? 0 : 1;
-    const animation = isInstant ? NODE_STATE.NO_ANIMATION : "";
-
     // Animate the steps to the algorithm
     for (let i = 0; i<steps.length; ++i) {
       animations.push(setTimeout(() => {
-        setCellDOM({...steps[i], state: `${NODE_STATE.VISITED} ${animation}`});
-      }, ANIMATION_SPEED.STEPS*i*animationSpeed*instantFactor));
+        setCellDOM({...steps[i], state: `${NODE_STATE.VISITED}`});
+      }, ANIMATION_SPEED.STEPS*i*animationSpeed));
     }
 
     // Animate the shortest path to end
     for (let i = 0; i<shortestPath.length; ++i) {
       animations.push(setTimeout(() => {
-        setCellDOM({...shortestPath[i], state: `${NODE_STATE.SHORTEST_PATH} ${animation}`});
+        setCellDOM({...shortestPath[i], state: `${NODE_STATE.SHORTEST_PATH}`});
       }, (ANIMATION_SPEED.SHORTEST_PATH*i
         +ANIMATION_SPEED.STEPS*steps.length)
-        *animationSpeed*instantFactor
+        *animationSpeed
       ));
     }
 
@@ -167,31 +167,33 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       setHasProcessedSteps(false);
     }, (ANIMATION_SPEED.STEPS*steps.length
       +ANIMATION_SPEED.SHORTEST_PATH*shortestPath.length)
-      *animationSpeed*instantFactor
+      *animationSpeed
     ));
 
-    setPendingAnimation(animations);
+    setPendingAnimations(animations);
     setHasDisplayedAlgorithm(true);
     setHasProcessedSteps(true);
   }, [
     setIsRunning, grid, algorithm, animationSpeed,
-    clearState, startNode,
+    clearState, startNode
   ]);
 
   const handleMouseDown = (row, col) => {
     if (isRunning) return;
+    setMouseIsPressed(true);
+
     // Set the dragged item
     if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state)) {
       setDraggedNode(grid[row][col]);
 
+      if (hasDisplayedAlgorithm) {
+        clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+      }
       // Will remove the og start/end node
       setPreviousNode({...grid[row][col], state: ""});
 
-      setCell(grid[row][col]);
-
     // Start toggling cells between wall and none
     } else if (!hasDisplayedAlgorithm) {
-      setMouseIsPressed(true);
       toggleNewGridWall(row, col);
       setPreviousNode(grid[row][col]);
     }
@@ -200,14 +202,27 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   // Stop toggling cells between wall and none
   const handleMouseUp = () => {
     // Set the new start/end node position
-    setCell(draggedNode);
+    if (draggedNode) {
+      // Sometimes there's a start/end node duplicate so delete it
+      clearState([draggedNode.state]);
+
+      setGrid(setNewGridCell(draggedNode));
+      // setCellDOM(draggedNode);
+
+      if (draggedNode.state===NODE_STATE.START) {
+        setStartNode({row: draggedNode.row, col: draggedNode.col});
+      }
+    }
 
     setDraggedNode(null);
     setMouseIsPressed(false);
+
   }
 
+  // * executed after handleMouseLeave
   const handleMouseEnter = (row, col) => {
     // Move the start node around with the mouse
+    if (!mouseIsPressed) return;
     if (draggedNode) {
       // Case start and end node overlap, don't move the draggedNode
       if ([draggedNode.state, grid[row][col].state].includes(NODE_STATE.START)
@@ -219,10 +234,11 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       // Set the current row and col to be start/end
       const newDraggedNode = {row: row, col: col, state: draggedNode.state};
       setDraggedNode(newDraggedNode);
+      setGrid(setNewGridCell(newDraggedNode));
       setCellDOM(newDraggedNode);
 
       // Remove the previous node and update it to the current node
-      // ! case it went over a start/end node previously, this removes the copy
+      // * case it went over a start/end node previously, this removes the copy
       setGrid(setNewGridCell(previousNode));
       setCellDOM(previousNode);
 
@@ -233,12 +249,8 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         setPreviousNode(grid[row][col]);
       }
 
-      if (hasDisplayedAlgorithm) {
-        visualizeAlgorithm(true);
-      }
-
     // Toggle the entered cell between a wall or none
-    } else if (mouseIsPressed && !isRunning && !hasDisplayedAlgorithm
+    } else if (!isRunning && !hasDisplayedAlgorithm
         && grid[row][col].state!==NODE_STATE.START
         && grid[row][col].state!==NODE_STATE.END
         // There's a bug that registers 2 enters in a square when you enter
@@ -250,8 +262,9 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   }
 
   // Replace current cell with og state after changed to start/end node
+  // * executed before handleMouseEnter
   const handleMouseLeave = (row, col) => {
-    if (!draggedNode) return;
+    if (!draggedNode || !mouseIsPressed) return;
     // if start, then end else start
     let oppositeSide = draggedNode.state===NODE_STATE.START ? NODE_STATE.END : NODE_STATE.START;
 
@@ -268,22 +281,17 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   useEffect(() => {
     // Clear the animation if visualizing but the user aborted
     if (!isRunning && hasProcessedSteps) {
-      clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-      for (let i = 0; i<pendingAnimations.length; ++i) {
-        clearTimeout(pendingAnimations[i]);
-      }
-
-      setHasDisplayedAlgorithm(false);
-      setHasProcessedSteps(false);
+      clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
       return;
 
-    // Do not run the algorithm if it is already running
-    } else if (!isRunning || hasProcessedSteps) {
-      return;
+    // run the algorithm if user pressed play
+    // and it has not been run before
+    } else if (isRunning && !hasProcessedSteps) {
+      visualizeAlgorithm();
     }
 
-    visualizeAlgorithm(false);
-  }, [isRunning, clearState,hasProcessedSteps, pendingAnimations, visualizeAlgorithm]);
+  }, [isRunning, hasProcessedSteps, clearCache,
+     visualizeAlgorithm]);
 
   // hasProcessedSteps must be the same as isRunning
   useEffect(() => setHasProcessedSteps(isRunning), [isRunning]);
