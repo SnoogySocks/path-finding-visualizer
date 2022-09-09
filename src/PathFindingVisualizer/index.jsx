@@ -11,7 +11,7 @@ const PathFindingVisualizer = () => {
   const [algorithm, setAlgorithm] = useState(new BFS());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
-  const toggleVisualizeAlgorithm = () => {
+  const toggleIsRunning = () => {
     setIsRunning(!isRunning);
   }
 
@@ -20,7 +20,7 @@ const PathFindingVisualizer = () => {
       <div className="header">
         <ToolBar
           isRunning={isRunning}
-          onVisualize={toggleVisualizeAlgorithm}
+          onVisualize={toggleIsRunning}
           algorithm={algorithm}
           setAlgorithm={setAlgorithm}
           setAnimationSpeed={setAnimationSpeed}

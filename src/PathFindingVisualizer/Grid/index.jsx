@@ -10,7 +10,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const [grid, setGrid] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
-  const [hasDisplayedAlgorithm, setHasDisplayedAlgorithm] = useState(false);
+  const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
   const [previousNode, setPreviousNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [pendingAnimations, setPendingAnimations] = useState([]);
@@ -127,7 +127,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       clearTimeout(pendingAnimations[i]);
     }
 
-    setHasDisplayedAlgorithm(false);
+    setHasDisplayedPath(false);
     setHasProcessedSteps(false);
     setPendingAnimations([]);
   }, [clearState, pendingAnimations]);
@@ -173,7 +173,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     ));
 
     setPendingAnimations(animations);
-    setHasDisplayedAlgorithm(true);
+    setHasDisplayedPath(true);
     setHasProcessedSteps(true);
   }, [
     setIsRunning, grid, algorithm, animationSpeed,
@@ -188,14 +188,14 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state)) {
       setDraggedNode(grid[row][col]);
 
-      if (hasDisplayedAlgorithm) {
+      if (hasDisplayedPath) {
         clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
       }
       // Will remove the og start/end node
       setPreviousNode({...grid[row][col], state: ""});
 
     // Start toggling cells between wall and none
-    } else if (!hasDisplayedAlgorithm) {
+    } else if (!hasDisplayedPath) {
       toggleNewGridWall(row, col);
       setPreviousNode(grid[row][col]);
     }
@@ -251,7 +251,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
       }
 
     // Toggle the entered cell between a wall or none
-    } else if (!isRunning && !hasDisplayedAlgorithm
+    } else if (!isRunning && !hasDisplayedPath
         && grid[row][col].state!==NODE_STATE.START
         && grid[row][col].state!==NODE_STATE.END
         // There's a bug that registers 2 enters in a square when you enter
