@@ -106,8 +106,10 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
         const node = document.getElementById(`node-${row}-${col}`);
 
         for (let stateToClear of statesToClear) {
-          // console.log(`${NODE_STATE.DEFAULT} ${stateToClear}`+"###"+node.className.trimEnd());
-          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className) {
+          // Toggle the current node's state to its reverse animation unless
+          // it is the dragged node then don't.
+          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className
+            && (!draggedNode || draggedNode.row!==row || draggedNode.col!==col)) {
             node.className = toggleReverseState(node.className);
             hasToggled = true;
           }
@@ -116,7 +118,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     }
 
     return hasToggled;
-  }, [grid, initNodeFromDOM]);
+  }, [grid, initNodeFromDOM, draggedNode]);
 
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback(statesToClear => {
@@ -205,7 +207,6 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if (draggedNode) {
       // Sometimes there's a start/end node duplicate so delete it
       clearState([draggedNode.state]);
-
       setGrid(setNewGridCell(draggedNode));
       // setCellDOM(draggedNode);
 
