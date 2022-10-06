@@ -3,10 +3,19 @@ import React, {useState, useEffect, useCallback} from "react";
 
 // local imports
 import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"
+import BFS from "../../algorithms/BFS";
 import Node from "../Node"
 import "./Grid.css";
 
-const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
+
+interface GridProps {
+  isRunning: boolean;
+  setIsRunning: (isRunning: boolean) => void;
+  animationSpeed: number;
+}
+
+
+const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) => {
   const [grid, setGrid] = useState([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
@@ -19,7 +28,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     col: START_END_COORDS.START_NODE_COL,
   });
 
-  const toggleReverseState = state => {
+  const toggleReverseState = (state: string) => {
     const newState = state.split(" ")[1];
     if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {
       return `${NODE_STATE.DEFAULT} ${newState}-reverse`;
@@ -30,7 +39,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     return NODE_STATE.DEFAULT;
   }
 
-  const initNode = useCallback((row, col) => {
+  const initNode = useCallback((row: number, col: number) => {
     let state = "";
     if (row===START_END_COORDS.START_NODE_ROW && col===START_END_COORDS.START_NODE_COL) {
       state = NODE_STATE.START;
@@ -43,10 +52,10 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     };
   }, []);
 
-  const initNodeFromDOM = useCallback((row, col) => {
+  const initNodeFromDOM = useCallback((row: number, col: number) => {
     let state = "";
-    const node = document.getElementById(`node-${row}-${col}`)
-      .className.substring(NODE_STATE.DEFAULT.length+1);
+    const node = document.getElementById(`node-${row}-${col}`)?.
+        className.substring(NODE_STATE.DEFAULT.length+1);
     if (node===NODE_STATE.START) {
       state = NODE_STATE.START;
     } else if (node===NODE_STATE.END) {
@@ -60,11 +69,10 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
   const initGrid = useCallback(() => {
       let grid = new Array(GRID_SIZE.ROW_SIZE);
       for (let r = 0; r<grid.length; ++r) {
-        let row = new Array(GRID_SIZE.COL_SIZE);
-        for (let c = 0; c<row.length; ++c) {
-          row[c] = initNode(r, c);
+        grid[r] = new Array(GRID_SIZE.COL_SIZE);
+        for (let c = 0; c<grid[r].length; ++c) {
+          grid[r][c] = initNode(r, c);
         }
-        grid[r] = row;
       }
       return grid;
   }, [initNode]);
@@ -201,29 +209,12 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     }
   }
 
-  // Stop toggling cells between wall and none
-  const handleMouseUp = () => {
-    // Set the new start/end node position
-    if (draggedNode) {
-      // Sometimes there's a start/end node duplicate so delete it
-      clearState([draggedNode.state]);
-      setGrid(setNewGridCell(draggedNode));
-      // setCellDOM(draggedNode);
-
-      if (draggedNode.state===NODE_STATE.START) {
-        setStartNode({row: draggedNode.row, col: draggedNode.col});
-      }
-    }
-
-    setDraggedNode(null);
-    setMouseIsPressed(false);
-
-  }
-
   // * executed after handleMouseLeave
   const handleMouseEnter = (row, col) => {
     // Move the start node around with the mouse
     if (!mouseIsPressed) return;
+
+    // When you are dragging the start/end node
     if (draggedNode) {
       // Case start and end node overlap, don't move the draggedNode
       if ([draggedNode.state, grid[row][col].state].includes(NODE_STATE.START)
@@ -273,6 +264,26 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
     if (grid[row][col].state!==oppositeSide) {
       setCellDOM({...grid[row][col], state: ""});
     }
+  }
+
+
+  // Stop toggling cells between wall and none
+  const handleMouseUp = () => {
+    // Set the new start/end node position
+    if (draggedNode) {
+      // Sometimes there's a start/end node duplicate so delete it
+      clearState([draggedNode.state]);
+      setGrid(setNewGridCell(draggedNode));
+      // setCellDOM(draggedNode);
+
+      if (draggedNode.state===NODE_STATE.START) {
+        setStartNode({row: draggedNode.row, col: draggedNode.col});
+      }
+    }
+
+    setDraggedNode(null);
+    setMouseIsPressed(false);
+
   }
 
   useEffect(() => {

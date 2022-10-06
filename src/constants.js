@@ -29,6 +29,6 @@ export const DELTA = [
 ]
 
 export const ANIMATION_SPEED = {
-    STEPS: 10,
+    STEPS: 5,
     SHORTEST_PATH: 50,
 }

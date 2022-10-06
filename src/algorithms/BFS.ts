@@ -67,3 +67,5 @@ export default class BFS {
         return {steps, shortestPath: []};
     }
 }
+
+export type BFSType = (typeof BFS);
