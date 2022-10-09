@@ -90,12 +90,7 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
     clearState, startNode
   ]);
 
-  const handleMouseDown = (row: number, col: number) => {
-    if (isRunning) return;
-    setMouseIsPressed(true);
-
-    // Set the dragged item
-    if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state!)) {
+  const startDraggingOn = (row: number, col: number) => {
       setDraggedNode(grid[row][col]);
 
       if (hasDisplayedPath) {
@@ -103,30 +98,18 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
       }
       // Will remove the og start/end node
       setPreviousNode({...grid[row][col], state: ""});
-
-    // Start toggling cells between wall and none
-    } else if (!hasDisplayedPath) {
-      toggleNewGridWall(row, col);
-      setPreviousNode(grid[row][col]);
-    }
   }
 
-  // * executed after handleMouseLeave
-  const handleMouseEnter = (row: number, col: number) => {
-    // Move the start node around with the mouse
-    if (!mouseIsPressed) return;
-
-    // When you are dragging the start/end node
-    if (draggedNode) {
+  const dragOnto = (row: number, col: number) => {
       // Case start and end node overlap, don't move the draggedNode
-      if ([draggedNode.state, grid[row][col].state].includes(NODE_STATE.START)
-          && [draggedNode.state, grid[row][col].state].includes(NODE_STATE.END)) {
-        setCellDOM(draggedNode);
+      if ([draggedNode!.state, grid[row][col].state].includes(NODE_STATE.START)
+          && [draggedNode!.state, grid[row][col].state].includes(NODE_STATE.END)) {
+        setCellDOM(draggedNode!);
         return;
       }
 
       // Set the current row and col to be start/end
-      const newDraggedNode = {row: row, col: col, state: draggedNode.state};
+      const newDraggedNode = {row: row, col: col, state: draggedNode!.state};
       setDraggedNode(newDraggedNode);
       setGrid(setNewGridCell(newDraggedNode));
       setCellDOM(newDraggedNode);
@@ -142,6 +125,43 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
       } else {
         setPreviousNode(grid[row][col]);
       }
+
+  }
+
+  const endDragging = () => {
+      // Sometimes there's a start/end node duplicate so delete it
+      clearState([draggedNode!.state!], draggedNode!);
+      setGrid(setNewGridCell(draggedNode!));
+      // setCellDOM(draggedNode);
+
+      if (draggedNode!.state===NODE_STATE.START) {
+        setStartNode({row: draggedNode!.row, col: draggedNode!.col});
+      }
+  }
+
+  const handleMouseDown = (row: number, col: number) => {
+    if (isRunning) return;
+    setMouseIsPressed(true);
+
+    // Set the dragged item
+    if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state!)) {
+      startDraggingOn(row, col);
+
+    // Start toggling cells between wall and none
+    } else if (!hasDisplayedPath) {
+      toggleNewGridWall(row, col);
+      setPreviousNode(grid[row][col]);
+    }
+  }
+
+  // * executed after handleMouseLeave
+  const handleMouseEnter = (row: number, col: number) => {
+    // Move the start node around with the mouse
+    if (!mouseIsPressed) return;
+
+    // When you are dragging the start/end node
+    if (draggedNode) {
+      dragOnto(row, col);
 
     // Toggle the entered cell between a wall or none
     } else if (!isRunning && !hasDisplayedPath
@@ -168,24 +188,15 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
     }
   }
 
-
   // Stop toggling cells between wall and none
   const handleMouseUp = () => {
     // Set the new start/end node position
     if (draggedNode) {
-      // Sometimes there's a start/end node duplicate so delete it
-      clearState([draggedNode.state!], draggedNode);
-      setGrid(setNewGridCell(draggedNode));
-      // setCellDOM(draggedNode);
-
-      if (draggedNode.state===NODE_STATE.START) {
-        setStartNode({row: draggedNode.row, col: draggedNode.col});
-      }
+      endDragging();
     }
 
     setDraggedNode(null);
     setMouseIsPressed(false);
-
   }
 
   useEffect(() => {
@@ -210,10 +221,10 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
       <div className="grid-border" onMouseUp={handleMouseUp}>
         <table cellSpacing="0">
           <tbody className="grid">
-            {grid.map((row, rowIdx) => {
+            {grid.map((rowNodes, rowIdx) => {
 
               return (<tr key={rowIdx}>
-                {row.map((node, nodeIdx) => {
+                {rowNodes.map((node, nodeIdx) => {
 
                   const {row, col, state} = node;
                   return (<Node
