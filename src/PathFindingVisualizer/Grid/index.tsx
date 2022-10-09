@@ -3,26 +3,27 @@ import React, {useState, useEffect, useCallback} from "react";
 
 // local imports
 import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"
-import BFS from "../../algorithms/BFS";
-import Node from "../Node"
+import Algorithm from "../../algorithms/Algorithm";
+import {Node, NodeType} from "../Node"
 import "./Grid.css";
 
 
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
+  algorithm: Algorithm;
   animationSpeed: number;
 }
 
 
-const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) => {
-  const [grid, setGrid] = useState([]);
+const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
+  const [grid, setGrid] = useState<NodeType[][]>([]);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
-  const [previousNode, setPreviousNode] = useState(null);
-  const [draggedNode, setDraggedNode] = useState(null);
-  const [pendingAnimations, setPendingAnimations] = useState([]);
+  const [previousNode, setPreviousNode] = useState<NodeType|null>(null);
+  const [draggedNode, setDraggedNode] = useState<NodeType|null>(null);
+  const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState({
     row: START_END_COORDS.START_NODE_ROW,
     col: START_END_COORDS.START_NODE_COL,
@@ -78,7 +79,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
   }, [initNode]);
 
   // Create a new grid with grid[row][col] modified to value
-  const setNewGridCell = useCallback(node => {
+  const setNewGridCell = useCallback((node: NodeType): NodeType[][] => {
     let newGrid = new Array(grid.length);
     for (let r = 0; r<grid.length; ++r) {
       newGrid[r] = [...grid[r]];
@@ -87,13 +88,13 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
     return newGrid;
   }, [grid]);
 
-  const setCellDOM = node => {
-    document.getElementById(`node-${node.row}-${node.col}`)
+  const setCellDOM = (node: NodeType) => {
+    document.getElementById(`node-${node.row}-${node.col}`)!
       .className = `${NODE_STATE.DEFAULT} ${node.state}`;
   }
 
   // Create a new grid with grid[row][col] toggled between a wall or none
-  const toggleNewGridWall = (row, col) => {
+  const toggleNewGridWall = (row: number, col: number) => {
     let toggledWall = grid[row][col].state===NODE_STATE.WALL
       ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
     let value = {
@@ -105,13 +106,13 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
   }
 
   // Takes a list of states to clear from the grid
-  const clearState = useCallback(statesToClear => {
+  const clearState = useCallback((statesToClear: string[]): boolean => {
     let hasToggled = false;
 
     for (let r = 0; r<grid.length; ++r) {
       for (let c = 0; c < grid[r].length; ++c) {
         const {row, col} = initNodeFromDOM(r, c);
-        const node = document.getElementById(`node-${row}-${col}`);
+        const node = document.getElementById(`node-${row}-${col}`)!;
 
         for (let stateToClear of statesToClear) {
           // Toggle the current node's state to its reverse animation unless
@@ -129,7 +130,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
   }, [grid, initNodeFromDOM, draggedNode]);
 
   // Clear state and states that prevent grid interaction after visualization
-  const clearCache = useCallback(statesToClear => {
+  const clearCache = useCallback((statesToClear: string[]) => {
     clearState(statesToClear);
     for (let i = 0; i<pendingAnimations.length; ++i) {
       clearTimeout(pendingAnimations[i]);
@@ -188,12 +189,12 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
     clearState, startNode
   ]);
 
-  const handleMouseDown = (row, col) => {
+  const handleMouseDown = (row: number, col: number) => {
     if (isRunning) return;
     setMouseIsPressed(true);
 
     // Set the dragged item
-    if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state)) {
+    if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state!)) {
       setDraggedNode(grid[row][col]);
 
       if (hasDisplayedPath) {
@@ -210,7 +211,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
   }
 
   // * executed after handleMouseLeave
-  const handleMouseEnter = (row, col) => {
+  const handleMouseEnter = (row: number, col: number) => {
     // Move the start node around with the mouse
     if (!mouseIsPressed) return;
 
@@ -231,11 +232,11 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
 
       // Remove the previous node and update it to the current node
       // * case it went over a start/end node previously, this removes the copy
-      setGrid(setNewGridCell(previousNode));
-      setCellDOM(previousNode);
+      setGrid(setNewGridCell(previousNode!));
+      setCellDOM(previousNode!);
 
       // If there is a reverse at the end, remove it
-      if (grid[row][col].state.includes("reverse")) {
+      if (grid[row][col].state!.includes("reverse")) {
         setPreviousNode({...grid[row][col], state: ""});
       } else {
         setPreviousNode(grid[row][col]);
@@ -247,7 +248,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
         && grid[row][col].state!==NODE_STATE.END
         // There's a bug that registers 2 enters in a square when you enter
         // only once. So this prevents that.
-        && (previousNode.row!==row || previousNode.col!==col)) {
+        && (previousNode!.row!==row || previousNode!.col!==col)) {
       toggleNewGridWall(row, col);
       setPreviousNode(grid[row][col]);
     }
@@ -255,7 +256,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
 
   // Replace current cell with og state after changed to start/end node
   // * executed before handleMouseEnter
-  const handleMouseLeave = (row, col) => {
+  const handleMouseLeave = (row: number, col: number) => {
     if (!draggedNode || !mouseIsPressed) return;
     // if start, then end else start
     let oppositeSide = draggedNode.state===NODE_STATE.START ? NODE_STATE.END : NODE_STATE.START;
@@ -272,7 +273,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
     // Set the new start/end node position
     if (draggedNode) {
       // Sometimes there's a start/end node duplicate so delete it
-      clearState([draggedNode.state]);
+      clearState([draggedNode.state!]);
       setGrid(setNewGridCell(draggedNode));
       // setCellDOM(draggedNode);
 
@@ -323,7 +324,7 @@ const Grid = ({isRunning, setIsRunning, algorithm, animationSpeed} : GridProps) 
                     key={nodeIdx}
                     row={row}
                     col={col}
-                    state={state}
+                    state={state!}
                     onMouseDown={(row, col) => handleMouseDown(row, col)}
                     onMouseUp={handleMouseUp}
                     onMouseEnter={(row, col) => handleMouseEnter(row, col)}

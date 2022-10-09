@@ -1,16 +1,17 @@
 import { NODE_STATE, DELTA } from "../constants";
 
 // Local files
+import Algorithm from "./Algorithm";
 import {findShortestPath} from "./util"
+import {NodeType} from "../PathFindingVisualizer/Node";
 
-export default class BFS {
+export default class BFS extends Algorithm {
     constructor () {
-        this.name = "BFS";
-        this.info = "placeholder";
+        super("BFS", "placeholder");
     }
 
     // Run the algorithm and return the steps and shortest path
-    run (grid, start) {
+    run (grid: NodeType[][], start: NodeType): {steps: NodeType[], shortestPath: NodeType[]} {
         let steps = [];
         let parents = new Array(grid.length);
 
@@ -37,7 +38,7 @@ export default class BFS {
         distance[start.row][start.col] = 0;
 
         while (queue.length>0) {
-            const previousNode = queue.shift();
+            const previousNode = queue.shift()!;
             for (const [dr, dc] of DELTA) {
                 let [r, c] = [previousNode.row+dr, previousNode.col+dc];
 
@@ -67,5 +68,3 @@ export default class BFS {
         return {steps, shortestPath: []};
     }
 }
-
-export type BFSType = (typeof BFS);

@@ -1,7 +1,9 @@
-export const findShortestPath = (parents, end) => {
+import {NodeType} from "../PathFindingVisualizer/Node";
+
+export const findShortestPath = (parents: NodeType[][], end: NodeType): NodeType[] => {
     let current = end;
     let shortestPath = [];
-    
+
     // While current has a parent, go to its previousNode
     while (current) {
         shortestPath.push(current);

@@ -1,5 +1,5 @@
 import React from 'react';
-import BFSType from "../../algorithms/BFS";
+import Algorithm from "../../algorithms/Algorithm";
 
 // local imports
 import "./Toolbar.css";
@@ -7,7 +7,7 @@ import "./Toolbar.css";
 interface ToolBarProps {
   isRunning: boolean;
   onVisualize: () => void;
-  algorithm: BFSType;
+  algorithm: Algorithm;
   setAlgorithm: (algorithm: any) => void;
   setAnimationSpeed: (speed: number) => void;
 }

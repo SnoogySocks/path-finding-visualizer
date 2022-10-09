@@ -4,11 +4,12 @@ import React, {useState} from "react";
 import "./PathFindingVisualizer.css";
 import ToolBar from "./ToolBar";
 import Grid from "./Grid"
+import Algorithm from "../algorithms/Algorithm";
 import BFS from "../algorithms/BFS";
 
-const PathFindingVisualizer = () => {
+const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
-  const [algorithm, setAlgorithm] = useState(new BFS());
+  const [algorithm, setAlgorithm] = useState<Algorithm>(new BFS());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   const toggleIsRunning = () => {
