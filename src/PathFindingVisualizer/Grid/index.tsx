@@ -3,6 +3,7 @@ import React, {useState, useEffect, useCallback} from "react";
 
 // local imports
 import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"
+import useGrid from "./useGrid";
 import Algorithm from "../../algorithms/Algorithm";
 import {Node, NodeType} from "../Node"
 import "./Grid.css";
@@ -17,7 +18,7 @@ interface GridProps {
 
 
 const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animationSpeed}) => {
-  const [grid, setGrid] = useState<NodeType[][]>([]);
+  const {grid, setGrid, setNewGridCell, setCellDOM, toggleNewGridWall, clearState} = useGrid();
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
@@ -29,109 +30,9 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
     col: START_END_COORDS.START_NODE_COL,
   });
 
-  const toggleReverseState = (state: string) => {
-    const newState = state.split(" ")[1];
-    if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {
-      return `${NODE_STATE.DEFAULT} ${newState}-reverse`;
-    } else if ([NODE_STATE.VISITED_REVERSE, NODE_STATE.SHORTEST_PATH_REVERSE,
-        NODE_STATE.WALL_REVERSE].includes(newState)) {
-      return `${NODE_STATE.DEFAULT} ${newState.substring(0, newState.length-"-reverse".length)}`;
-    }
-    return NODE_STATE.DEFAULT;
-  }
-
-  const initNode = useCallback((row: number, col: number) => {
-    let state = "";
-    if (row===START_END_COORDS.START_NODE_ROW && col===START_END_COORDS.START_NODE_COL) {
-      state = NODE_STATE.START;
-    } else if (row===START_END_COORDS.END_NODE_ROW && col===START_END_COORDS.END_NODE_COL) {
-      state = NODE_STATE.END;
-    }
-
-    return {
-      row, col, state,
-    };
-  }, []);
-
-  const initNodeFromDOM = useCallback((row: number, col: number) => {
-    let state = "";
-    const node = document.getElementById(`node-${row}-${col}`)?.
-        className.substring(NODE_STATE.DEFAULT.length+1);
-    if (node===NODE_STATE.START) {
-      state = NODE_STATE.START;
-    } else if (node===NODE_STATE.END) {
-      state = NODE_STATE.END;
-    }
-    return {
-      row, col, state,
-    };
-  }, []);
-
-  const initGrid = useCallback(() => {
-      let grid = new Array(GRID_SIZE.ROW_SIZE);
-      for (let r = 0; r<grid.length; ++r) {
-        grid[r] = new Array(GRID_SIZE.COL_SIZE);
-        for (let c = 0; c<grid[r].length; ++c) {
-          grid[r][c] = initNode(r, c);
-        }
-      }
-      return grid;
-  }, [initNode]);
-
-  // Create a new grid with grid[row][col] modified to value
-  const setNewGridCell = useCallback((node: NodeType): NodeType[][] => {
-    let newGrid = new Array(grid.length);
-    for (let r = 0; r<grid.length; ++r) {
-      newGrid[r] = [...grid[r]];
-    }
-    newGrid[node.row][node.col] = node;
-    return newGrid;
-  }, [grid]);
-
-  const setCellDOM = (node: NodeType) => {
-    document.getElementById(`node-${node.row}-${node.col}`)!
-      .className = `${NODE_STATE.DEFAULT} ${node.state}`;
-  }
-
-  // Create a new grid with grid[row][col] toggled between a wall or none
-  const toggleNewGridWall = (row: number, col: number) => {
-    let toggledWall = grid[row][col].state===NODE_STATE.WALL
-      ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
-    let value = {
-      ...grid[row][col],
-      state: toggleReverseState(`${NODE_STATE.DEFAULT} ${toggledWall}`)
-        .substring(NODE_STATE.DEFAULT.length+1),
-    };
-    setGrid(setNewGridCell(value));
-  }
-
-  // Takes a list of states to clear from the grid
-  const clearState = useCallback((statesToClear: string[]): boolean => {
-    let hasToggled = false;
-
-    for (let r = 0; r<grid.length; ++r) {
-      for (let c = 0; c < grid[r].length; ++c) {
-        const {row, col} = initNodeFromDOM(r, c);
-        const node = document.getElementById(`node-${row}-${col}`)!;
-
-        for (let stateToClear of statesToClear) {
-          // Toggle the current node's state to its reverse animation unless
-          // it is the dragged node then don't.
-          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className
-            && (!draggedNode || draggedNode.row!==row || draggedNode.col!==col)) {
-            node.className = toggleReverseState(node.className);
-            hasToggled = true;
-          }
-        }
-      }
-    }
-
-    return hasToggled;
-  }, [grid, initNodeFromDOM, draggedNode]);
-
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback((statesToClear: string[]) => {
-    clearState(statesToClear);
+    clearState(statesToClear, draggedNode!);
     for (let i = 0; i<pendingAnimations.length; ++i) {
       clearTimeout(pendingAnimations[i]);
     }
@@ -145,7 +46,7 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   const visualizeAlgorithm = useCallback(async () => {
     // Clear the grid and stop any previous animation
-    const hasDisplayedAlgo = clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+    const hasDisplayedAlgo = clearState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH], draggedNode!);
 
     // Sleep for the animation time (1.5s)
     // Only sleep when there are toggled nodes
@@ -273,7 +174,7 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
     // Set the new start/end node position
     if (draggedNode) {
       // Sometimes there's a start/end node duplicate so delete it
-      clearState([draggedNode.state!]);
+      clearState([draggedNode.state!], draggedNode);
       setGrid(setNewGridCell(draggedNode));
       // setCellDOM(draggedNode);
 
@@ -288,10 +189,6 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
   }
 
   useEffect(() => {
-    setGrid(initGrid());
-  }, [initGrid]);
-
-  useEffect(() => {
     // Clear the animation if visualizing but the user aborted
     if (!isRunning && hasProcessedSteps) {
       clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
@@ -303,8 +200,7 @@ const Grid: React.FC<GridProps> = ({isRunning, setIsRunning, algorithm, animatio
       visualizeAlgorithm();
     }
 
-  }, [isRunning, hasProcessedSteps, clearCache,
-     visualizeAlgorithm]);
+  }, [isRunning, hasProcessedSteps, clearCache, visualizeAlgorithm]);
 
   // hasProcessedSteps must be the same as isRunning
   useEffect(() => setHasProcessedSteps(isRunning), [isRunning]);
