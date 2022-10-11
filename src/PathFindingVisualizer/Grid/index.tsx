@@ -2,12 +2,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 // local imports
-import {
-  START_END_COORDS,
-  NODE_STATE,
-  ANIMATION_SPEED,
-} from "../../constants";
+import { START_END_COORDS, NODE_STATE, ANIMATION_SPEED } from "../../constants";
 import useGrid from "./useGrid";
+import useDrag from "./useDrag";
 import Algorithm from "../../algorithms/Algorithm";
 import { Node, NodeType } from "../Node";
 import "./Grid.css";
@@ -15,29 +12,22 @@ import "./Grid.css";
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
+  bigWallBuilder: boolean;
+  bigEraser: boolean;
   algorithm: Algorithm;
   animationSpeed: number;
 }
 
 const Grid: React.FC<GridProps> = ({
-  isRunning,
-  setIsRunning,
+  isRunning, setIsRunning,
+  bigWallBuilder, bigEraser,
   algorithm,
   animationSpeed,
 }) => {
-  const {
-    grid,
-    setGrid,
-    setNewGridCell,
-    setCellDOM,
-    toggleNewGridWall,
-    clearState,
-  } = useGrid();
+  const { grid, setCell, setCellDOM, toggleGridWall, clearGridState } = useGrid();
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
-  const [previousNode, setPreviousNode] = useState<NodeType | null>(null);
-  const [draggedNode, setDraggedNode] = useState<NodeType | null>(null);
   const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState<NodeType>({
     row: START_END_COORDS.START_NODE_ROW,
@@ -45,11 +35,16 @@ const Grid: React.FC<GridProps> = ({
     weight: 1,
     state: NODE_STATE.START,
   });
+  const {
+    draggedNode, setDraggedNode,
+    previousNode, setPreviousNode,
+    dragStart, dragEnd, dragOver,
+  } = useDrag(setCell, setCellDOM, setStartNode, clearGridState);
 
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback(
     (statesToClear: string[]) => {
-      clearState(statesToClear, draggedNode!);
+      clearGridState(statesToClear, draggedNode!);
       for (let i = 0; i < pendingAnimations.length; ++i) {
         clearTimeout(pendingAnimations[i]);
       }
@@ -58,14 +53,14 @@ const Grid: React.FC<GridProps> = ({
       setHasProcessedSteps(false);
       setPendingAnimations([]);
     },
-    [clearState, pendingAnimations]
+    [clearGridState, pendingAnimations]
   );
 
   // visualize the algorithm on the grid
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
   const visualizeAlgorithm = useCallback(async () => {
     // Clear the grid and stop any previous animation
-    const hasDisplayedAlgo = clearState(
+    const hasDisplayedAlgo = clearGridState(
       [NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH],
       draggedNode!
     );
@@ -110,57 +105,7 @@ const Grid: React.FC<GridProps> = ({
     setPendingAnimations(animations);
     setHasDisplayedPath(true);
     setHasProcessedSteps(true);
-  }, [setIsRunning, grid, algorithm, animationSpeed, clearState, startNode]);
-
-  const startDraggingOn = (row: number, col: number) => {
-    setDraggedNode(grid[row][col]);
-
-    if (hasDisplayedPath) {
-      clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
-    }
-    // Will remove the og start/end node
-    setPreviousNode({ ...grid[row][col], state: "" });
-  };
-
-  const dragOnto = (row: number, col: number) => {
-    // Case start and end node overlap, don't move the draggedNode
-    if (
-      [draggedNode!.state, grid[row][col].state].includes(NODE_STATE.START) &&
-      [draggedNode!.state, grid[row][col].state].includes(NODE_STATE.END)
-    ) {
-      setCellDOM(draggedNode!);
-      return;
-    }
-
-    // Set the current row and col to be start/end
-    const newDraggedNode = { ...draggedNode!, row: row, col: col };
-    setDraggedNode(newDraggedNode);
-    setGrid(setNewGridCell(newDraggedNode));
-    setCellDOM(newDraggedNode);
-
-    // Remove the previous node and update it to the current node
-    // * case it went over a start/end node previously, this removes the copy
-    setGrid(setNewGridCell(previousNode!));
-    setCellDOM(previousNode!);
-
-    // If there is a reverse at the end, remove it
-    if (grid[row][col].state!.includes("reverse")) {
-      setPreviousNode({ ...grid[row][col], state: "" });
-    } else {
-      setPreviousNode(grid[row][col]);
-    }
-  };
-
-  const endDragging = () => {
-    // Sometimes there's a start/end node duplicate so delete it
-    clearState([draggedNode!.state!], draggedNode!);
-    setGrid(setNewGridCell(draggedNode!));
-    // setCellDOM(draggedNode);
-
-    if (draggedNode!.state === NODE_STATE.START) {
-      setStartNode(draggedNode!);
-    }
-  };
+  }, [setIsRunning, grid, algorithm, animationSpeed, clearGridState, startNode]);
 
   const handleMouseDown = (row: number, col: number) => {
     if (isRunning) return;
@@ -168,11 +113,14 @@ const Grid: React.FC<GridProps> = ({
 
     // Set the dragged item
     if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state!)) {
-      startDraggingOn(row, col);
+      dragStart(grid, row, col);
+      if (hasDisplayedPath) {
+        clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+      }
 
       // Start toggling cells between wall and none
     } else if (!hasDisplayedPath) {
-      toggleNewGridWall(row, col);
+      toggleGridWall(row, col);
       setPreviousNode(grid[row][col]);
     }
   };
@@ -184,7 +132,7 @@ const Grid: React.FC<GridProps> = ({
 
     // When you are dragging the start/end node
     if (draggedNode) {
-      dragOnto(row, col);
+      dragOver(grid, row, col);
 
       // Toggle the entered cell between a wall or none
     } else if (
@@ -196,7 +144,7 @@ const Grid: React.FC<GridProps> = ({
       // only once. So this prevents that.
       (previousNode!.row !== row || previousNode!.col !== col)
     ) {
-      toggleNewGridWall(row, col);
+      toggleGridWall(row, col);
       setPreviousNode(grid[row][col]);
     }
   };
@@ -221,7 +169,7 @@ const Grid: React.FC<GridProps> = ({
   const handleMouseUp = () => {
     // Set the new start/end node position
     if (draggedNode) {
-      endDragging();
+      dragEnd();
     }
 
     setDraggedNode(null);
@@ -249,28 +197,23 @@ const Grid: React.FC<GridProps> = ({
       <div className="grid-border" onMouseUp={handleMouseUp}>
         <table cellSpacing="0">
           <tbody className="grid">
-            {grid.map((rowNodes, rowIdx) => {
-              return (
-                <tr key={rowIdx}>
-                  {rowNodes.map((node, nodeIdx) => {
-                    const { row, col, weight, state } = node;
-                    return (
-                      <Node
-                        key={nodeIdx}
-                        row={row}
-                        col={col}
-                        weight={weight}
-                        state={state!}
-                        onMouseDown={(row, col) => handleMouseDown(row, col)}
-                        onMouseUp={handleMouseUp}
-                        onMouseEnter={(row, col) => handleMouseEnter(row, col)}
-                        onMouseLeave={(row, col) => handleMouseLeave(row, col)}
-                      />
-                    );
-                  })}
-                </tr>
-              );
-            })}
+            {grid.map((rowNodes, rowIdx) => (
+              <tr key={rowIdx}>
+                {rowNodes.map((node, nodeIdx) => (
+                  <Node
+                    key={nodeIdx}
+                    row={node.row}
+                    col={node.col}
+                    weight={node.weight}
+                    state={node.state!}
+                    onMouseDown={(row, col) => handleMouseDown(row, col)}
+                    onMouseUp={handleMouseUp}
+                    onMouseEnter={(row, col) => handleMouseEnter(row, col)}
+                    onMouseLeave={(row, col) => handleMouseLeave(row, col)}
+                  />
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

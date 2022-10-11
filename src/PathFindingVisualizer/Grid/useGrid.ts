@@ -2,16 +2,14 @@ import React, {useState, useEffect, useCallback} from "react";
 import {NodeType} from "../Node";
 
 // import local files
-import {START_END_COORDS, GRID_SIZE, NODE_STATE, ANIMATION_SPEED} from "../../constants"
-import Grid from ".";
+import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants"
 
 interface useGridType {
   grid: NodeType[][];
-  setGrid: React.Dispatch<React.SetStateAction<NodeType[][]>>;
-  setNewGridCell: (node: NodeType) => NodeType[][];
+  setCell: (node: NodeType) => void;
   setCellDOM: (node: NodeType) => void;
-  toggleNewGridWall: (row: number, col: number) => void;
-  clearState: (statesToClear: string[], draggedNode: NodeType) => boolean;
+  toggleGridWall: (row: number, col: number) => void;
+  clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
 }
 
 const useGrid = (): useGridType => {
@@ -67,22 +65,23 @@ const useGrid = (): useGridType => {
   }, []);
 
   // Create a new grid with grid[row][col] modified to value
-  const setNewGridCell = useCallback((node: NodeType): NodeType[][] => {
+  const setCell = useCallback((node: NodeType) => {
     let newGrid = new Array(grid.length);
     for (let r = 0; r<grid.length; ++r) {
       newGrid[r] = [...grid[r]];
     }
     newGrid[node.row][node.col] = node;
-    return newGrid;
+    setGrid(newGrid)
   }, [grid]);
 
   const setCellDOM = (node: NodeType) => {
-    document.getElementById(`node-${node.row}-${node.col}`)!
-      .className = `${NODE_STATE.DEFAULT} ${node.state}`;
-  }
+    document.getElementById(
+      `node-${node.row}-${node.col}`
+    )!.className = `${NODE_STATE.DEFAULT} ${node.state}`;
+  };
 
   // Create a new grid with grid[row][col] toggled between a wall or none
-  const toggleNewGridWall = (row: number, col: number) => {
+  const toggleGridWall = (row: number, col: number) => {
     let toggledWall = grid[row][col].state===NODE_STATE.WALL
       ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
     let value = {
@@ -90,11 +89,11 @@ const useGrid = (): useGridType => {
       state: toggleReverseState(`${NODE_STATE.DEFAULT} ${toggledWall}`)
         .substring(NODE_STATE.DEFAULT.length+1),
     };
-    setGrid(setNewGridCell(value));
+    setCell(value);
   }
 
   // Takes a list of states to clear from the grid
-  const clearState = useCallback((statesToClear: string[], draggedNode: NodeType): boolean => {
+  const clearGridState = useCallback((statesToClear: string[], draggedNode: NodeType): boolean => {
     let hasToggled = false;
 
     for (let r = 0; r<grid.length; ++r) {
@@ -121,7 +120,7 @@ const useGrid = (): useGridType => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  return {grid, setGrid, setNewGridCell, setCellDOM, toggleNewGridWall, clearState};
+  return {grid, setCell, setCellDOM, toggleGridWall, clearGridState};
 }
 
 export default useGrid;
