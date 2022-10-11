@@ -22,6 +22,8 @@ export const NODE_STATE = {
     WALL_REVERSE: "node-wall-reverse",
 }
 
+export const SPECIAL_STATES = [NODE_STATE.START, NODE_STATE.END];
+
 export const DELTA = [
             [-1, 0],
     [0, -1],        [0, 1],

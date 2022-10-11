@@ -2,7 +2,7 @@ import { NODE_STATE, DELTA } from "../constants";
 
 // Local files
 import Algorithm from "./Algorithm";
-import { PriorityQueue, findShortestPath } from "./util";
+import { PriorityQueue, inBounds, findShortestPath } from "./util";
 import { NodeType } from "../PathFindingVisualizer/Node";
 
 export default class Dijkstra extends Algorithm {
@@ -44,7 +44,7 @@ export default class Dijkstra extends Algorithm {
 
         // Invalid if out of bounds or a wall or is already visited
         if (
-          !this.inBounds(grid, r, c) ||
+          !inBounds(grid, r, c) ||
           adjNode.state === NODE_STATE.WALL ||
           dis[r][c] <= dis[prevNode.row][prevNode.col]+adjNode.weight
         )

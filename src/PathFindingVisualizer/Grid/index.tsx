@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 // local imports
-import { START_END_COORDS, NODE_STATE, ANIMATION_SPEED } from "../../constants";
+import { START_END_COORDS, NODE_STATE, SPECIAL_STATES, ANIMATION_SPEED } from "../../constants";
 import useGrid from "./useGrid";
 import useDraggedNode from "./useDraggedNode";
+import useDraw from "./useDraw";
 import Algorithm from "../../algorithms/Algorithm";
 import { Node, NodeType } from "../Node";
 import "./Grid.css";
@@ -12,8 +13,8 @@ import "./Grid.css";
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
-  bigBrush: boolean;
-  bigEraser: boolean;
+  isBrushing: boolean;
+  isErasing: boolean;
   algorithm: Algorithm;
   animationSpeed: number;
 }
@@ -21,12 +22,12 @@ interface GridProps {
 const Grid: React.FC<GridProps> = ({
   isRunning,
   setIsRunning,
-  bigBrush,
-  bigEraser,
+  isBrushing,
+  isErasing,
   algorithm,
   animationSpeed,
 }) => {
-  const { grid, setCell, setCellDOM, clearGridState } = useGrid();
+  const { grid, setGrid, setCell, setCellDOM, clearGridState } = useGrid();
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
@@ -46,6 +47,7 @@ const Grid: React.FC<GridProps> = ({
     dragEnd,
     dragOver,
   } = useDraggedNode(setCell, setCellDOM, setStartNode, clearGridState);
+  const { toggleCellWall, brush, erase } = useDraw(setGrid, setCell);
 
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback(
@@ -125,7 +127,7 @@ const Grid: React.FC<GridProps> = ({
     setMouseIsPressed(true);
 
     // Set the dragged item
-    if ([NODE_STATE.START, NODE_STATE.END].includes(grid[row][col].state!)) {
+    if (SPECIAL_STATES.includes(grid[row][col].state)) {
       dragStart(grid, row, col);
       if (hasDisplayedPath) {
         clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
@@ -133,7 +135,13 @@ const Grid: React.FC<GridProps> = ({
 
       // Start toggling cells between wall and none
     } else if (!hasDisplayedPath) {
-      toggleGridWall(row, col);
+      if (isBrushing) {
+        brush(grid, row, col);
+      } else if (isErasing) {
+        erase(grid, row, col);
+      } else {
+        toggleCellWall(grid, row, col);
+      }
       setPreviousNode(grid[row][col]);
     }
   };
@@ -151,13 +159,19 @@ const Grid: React.FC<GridProps> = ({
     } else if (
       !isRunning &&
       !hasDisplayedPath &&
-      grid[row][col].state !== NODE_STATE.START &&
-      grid[row][col].state !== NODE_STATE.END &&
+      !hasProcessedSteps &&
+      !SPECIAL_STATES.includes(grid[row][col].state) &&
       // There's a bug that registers 2 enters in a square when you enter
       // only once. So this prevents that.
       (previousNode!.row !== row || previousNode!.col !== col)
     ) {
-      toggleGridWall(row, col);
+      if (isBrushing) {
+        brush(grid, row, col);
+      } else if (isErasing) {
+        erase(grid, row, col);
+      } else {
+        toggleCellWall(grid, row, col);
+      }
       setPreviousNode(grid[row][col]);
     }
   };

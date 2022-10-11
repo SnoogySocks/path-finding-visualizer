@@ -9,10 +9,6 @@ export default abstract class Algorithm {
     this.info = info;
   }
 
-  inBounds (grid: NodeType[][], r: number, c: number) {
-    return 0<=r && r<grid.length && 0<=c && c<grid[r].length;
-  }
-
   abstract run(
     grid: NodeType[][],
     startNode: NodeType

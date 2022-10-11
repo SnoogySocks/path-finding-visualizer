@@ -90,6 +90,10 @@ export class PriorityQueue {
   }
 }
 
+export const inBounds = (grid: NodeType[][], r: number, c: number) => {
+  return 0<=r && r<grid.length && 0<=c && c<grid[r].length;
+};
+
 export const findShortestPath = (
   parents: NodeType[][],
   end: NodeType

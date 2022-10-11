@@ -16,40 +16,38 @@ interface DropDown<T> {
 
 interface ToolBarProps {
   runButton: Tool;
-  bigBrush: Tool;
-  bigEraser: Tool;
+  isBrushing: Tool;
+  isErasing: Tool;
   algorithm: DropDown<Algorithm>;
   setAnimationSpeed: (speed: number) => void;
 }
 
 const ToolBar: React.FC<ToolBarProps> = ({
   runButton,
-  bigBrush,
-  bigEraser,
+  isBrushing,
+  isErasing,
   algorithm,
   setAnimationSpeed,
 }) => {
   const playButtonText = runButton.selected ? "ABORT" : "PLAY";
-  const bigBrushText = bigBrush.selected ? "BIG BRUSH" : "SMALL BRUSH";
-  const bigEraserText = bigEraser.selected ? "BIG ERASER" : "SMALL ERASER";
+  const isBrushingText = isBrushing.selected ? "BIG isBrushing" : "SMALL isBrushing";
+  const isErasingText = isErasing.selected ? "BIG isErasing" : "SMALL isErasing";
 
   // Deselect all tools and only select the one that was clicked
   const selectTool = (tool: Tool) => {
-    for (const t of [bigBrush, bigEraser]) {
+    for (const t of [isBrushing, isErasing]) {
       if (t !== tool) {
         t.set(false);
       }
     }
-    if (!tool.selected) {
-      tool.set(true);
-    }
+    tool.set(!tool.selected);
   }
 
   return (
     <div className="tool-bar">
       <button onClick={() => runButton.set(!runButton.selected)}>{playButtonText}</button>
-      <button onClick={() => selectTool(bigBrush)}>{bigBrushText}</button>
-      <button onClick={() => selectTool(bigEraser)}>{bigEraserText}</button>
+      <button onClick={() => selectTool(isBrushing)}>{isBrushingText}</button>
+      <button onClick={() => selectTool(isErasing)}>{isErasingText}</button>
     </div>
   );
 };

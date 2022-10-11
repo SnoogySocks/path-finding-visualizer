@@ -6,6 +6,7 @@ import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants"
 
 interface useGridType {
   grid: NodeType[][];
+  setGrid: React.Dispatch<React.SetStateAction<NodeType[][]>>;
   setCell: (node: NodeType) => void;
   setCellDOM: (node: NodeType) => void;
   clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
@@ -31,10 +32,8 @@ const useGrid = (): useGridType => {
     let state = "";
     const node = document.getElementById(`node-${row}-${col}`)?.
         className.substring(NODE_STATE.DEFAULT.length+1);
-    if (node===NODE_STATE.START) {
-      state = NODE_STATE.START;
-    } else if (node===NODE_STATE.END) {
-      state = NODE_STATE.END;
+    if (node===NODE_STATE.START || node===NODE_STATE.END) {
+      state = node;
     }
     return {
       row, col, weight: 1, state,
@@ -96,7 +95,7 @@ const useGrid = (): useGridType => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  return {grid, setCell, setCellDOM, clearGridState};
+  return {grid, setGrid, setCell, setCellDOM, clearGridState};
 }
 
 export default useGrid;
