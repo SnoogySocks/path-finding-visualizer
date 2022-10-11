@@ -8,23 +8,11 @@ interface useGridType {
   grid: NodeType[][];
   setCell: (node: NodeType) => void;
   setCellDOM: (node: NodeType) => void;
-  toggleGridWall: (row: number, col: number) => void;
   clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
 }
 
 const useGrid = (): useGridType => {
   const [grid, setGrid] = useState<NodeType[][]>([]);
-
-  const toggleReverseState = (state: string): string => {
-    const newState = state.split(" ")[1];
-    if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {
-      return `${NODE_STATE.DEFAULT} ${newState}-reverse`;
-    } else if ([NODE_STATE.VISITED_REVERSE, NODE_STATE.SHORTEST_PATH_REVERSE,
-        NODE_STATE.WALL_REVERSE].includes(newState)) {
-      return `${NODE_STATE.DEFAULT} ${newState.substring(0, newState.length-"-reverse".length)}`;
-    }
-    return NODE_STATE.DEFAULT;
-  }
 
   const initNode = useCallback((row: number, col: number): NodeType => {
     let state = "";
@@ -80,18 +68,6 @@ const useGrid = (): useGridType => {
     )!.className = `${NODE_STATE.DEFAULT} ${node.state}`;
   };
 
-  // Create a new grid with grid[row][col] toggled between a wall or none
-  const toggleGridWall = (row: number, col: number) => {
-    let toggledWall = grid[row][col].state===NODE_STATE.WALL
-      ? NODE_STATE.WALL : NODE_STATE.WALL_REVERSE;
-    let value = {
-      ...grid[row][col],
-      state: toggleReverseState(`${NODE_STATE.DEFAULT} ${toggledWall}`)
-        .substring(NODE_STATE.DEFAULT.length+1),
-    };
-    setCell(value);
-  }
-
   // Takes a list of states to clear from the grid
   const clearGridState = useCallback((statesToClear: string[], draggedNode: NodeType): boolean => {
     let hasToggled = false;
@@ -106,7 +82,7 @@ const useGrid = (): useGridType => {
           // it is the dragged node then don't.
           if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className
               && (!draggedNode || draggedNode.row!==row || draggedNode.col!==col)) {
-            node.className = toggleReverseState(node.className);
+            node.className = node.className+"-reverse";
             hasToggled = true;
           }
         }
@@ -120,7 +96,7 @@ const useGrid = (): useGridType => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  return {grid, setCell, setCellDOM, toggleGridWall, clearGridState};
+  return {grid, setCell, setCellDOM, clearGridState};
 }
 
 export default useGrid;

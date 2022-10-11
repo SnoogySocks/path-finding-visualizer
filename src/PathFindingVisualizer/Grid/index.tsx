@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 // local imports
 import { START_END_COORDS, NODE_STATE, ANIMATION_SPEED } from "../../constants";
 import useGrid from "./useGrid";
-import useDrag from "./useDrag";
+import useDraggedNode from "./useDraggedNode";
 import Algorithm from "../../algorithms/Algorithm";
 import { Node, NodeType } from "../Node";
 import "./Grid.css";
@@ -12,19 +12,21 @@ import "./Grid.css";
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
-  bigWallBuilder: boolean;
+  bigBrush: boolean;
   bigEraser: boolean;
   algorithm: Algorithm;
   animationSpeed: number;
 }
 
 const Grid: React.FC<GridProps> = ({
-  isRunning, setIsRunning,
-  bigWallBuilder, bigEraser,
+  isRunning,
+  setIsRunning,
+  bigBrush,
+  bigEraser,
   algorithm,
   animationSpeed,
 }) => {
-  const { grid, setCell, setCellDOM, toggleGridWall, clearGridState } = useGrid();
+  const { grid, setCell, setCellDOM, clearGridState } = useGrid();
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
@@ -36,10 +38,14 @@ const Grid: React.FC<GridProps> = ({
     state: NODE_STATE.START,
   });
   const {
-    draggedNode, setDraggedNode,
-    previousNode, setPreviousNode,
-    dragStart, dragEnd, dragOver,
-  } = useDrag(setCell, setCellDOM, setStartNode, clearGridState);
+    draggedNode,
+    setDraggedNode,
+    previousNode,
+    setPreviousNode,
+    dragStart,
+    dragEnd,
+    dragOver,
+  } = useDraggedNode(setCell, setCellDOM, setStartNode, clearGridState);
 
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback(
@@ -105,7 +111,14 @@ const Grid: React.FC<GridProps> = ({
     setPendingAnimations(animations);
     setHasDisplayedPath(true);
     setHasProcessedSteps(true);
-  }, [setIsRunning, grid, algorithm, animationSpeed, clearGridState, startNode]);
+  }, [
+    setIsRunning,
+    grid,
+    algorithm,
+    animationSpeed,
+    clearGridState,
+    startNode,
+  ]);
 
   const handleMouseDown = (row: number, col: number) => {
     if (isRunning) return;

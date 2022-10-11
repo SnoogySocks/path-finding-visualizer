@@ -11,7 +11,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
 
   // Tools
-  const [bigWallBuilder, setBigWallBuilder] = useState(false);
+  const [bigBrush, setBigBrush] = useState(false);
   const [bigEraser, setBigEraser] = useState(false);
 
   const [algorithm, setAlgorithm] = useState<Algorithm>(new Dijkstra());
@@ -22,7 +22,7 @@ const PathFindingVisualizer: React.FC = () => {
       <header className="header">
         <ToolBar
           runButton={{selected: isRunning, set: setIsRunning}}
-          bigWallBuilder={{selected: bigWallBuilder, set: setBigWallBuilder}}
+          bigBrush={{selected: bigBrush, set: setBigBrush}}
           bigEraser={{selected: bigEraser, set: setBigEraser}}
           algorithm={{val: algorithm, set: setAlgorithm}}
           setAnimationSpeed={setAnimationSpeed}
@@ -32,7 +32,7 @@ const PathFindingVisualizer: React.FC = () => {
         <Grid
           isRunning={isRunning}
           setIsRunning={setIsRunning}
-          bigWallBuilder={bigWallBuilder}
+          bigBrush={bigBrush}
           bigEraser={bigEraser}
           algorithm={algorithm}
           animationSpeed={animationSpeed}

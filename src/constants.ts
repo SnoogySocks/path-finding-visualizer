@@ -32,3 +32,6 @@ export const ANIMATION_SPEED = {
     STEPS: 8,
     SHORTEST_PATH: 20,
 }
+
+export const BIG_RADIUS = 1;
+

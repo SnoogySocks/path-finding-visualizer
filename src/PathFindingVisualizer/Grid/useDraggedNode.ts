@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { NodeType } from "../Node";
 
 // import local files
-import { START_END_COORDS, GRID_SIZE, NODE_STATE } from "../../constants";
+import { NODE_STATE } from "../../constants";
 
 interface useDragType {
   draggedNode: NodeType | null;
@@ -14,7 +14,7 @@ interface useDragType {
   dragEnd: () => void;
 }
 
-const useDrag = (
+const useDraggedNode = (
   setCell: (node: NodeType) => void,
   setCellDOM: (node: NodeType) => void,
   setStartNode: (node: NodeType) => void,
@@ -81,4 +81,4 @@ const useDrag = (
   };
 };
 
-export default useDrag;
+export default useDraggedNode;

@@ -16,7 +16,7 @@ interface DropDown<T> {
 
 interface ToolBarProps {
   runButton: Tool;
-  bigWallBuilder: Tool;
+  bigBrush: Tool;
   bigEraser: Tool;
   algorithm: DropDown<Algorithm>;
   setAnimationSpeed: (speed: number) => void;
@@ -24,18 +24,18 @@ interface ToolBarProps {
 
 const ToolBar: React.FC<ToolBarProps> = ({
   runButton,
-  bigWallBuilder,
+  bigBrush,
   bigEraser,
   algorithm,
   setAnimationSpeed,
 }) => {
   const playButtonText = runButton.selected ? "ABORT" : "PLAY";
-  const bigWallBuilderText = bigWallBuilder.selected ? "BIG WALLS" : "SMALL WALLS";
+  const bigBrushText = bigBrush.selected ? "BIG BRUSH" : "SMALL BRUSH";
   const bigEraserText = bigEraser.selected ? "BIG ERASER" : "SMALL ERASER";
 
   // Deselect all tools and only select the one that was clicked
   const selectTool = (tool: Tool) => {
-    for (const t of [bigWallBuilder, bigEraser]) {
+    for (const t of [bigBrush, bigEraser]) {
       if (t !== tool) {
         t.set(false);
       }
@@ -48,7 +48,7 @@ const ToolBar: React.FC<ToolBarProps> = ({
   return (
     <div className="tool-bar">
       <button onClick={() => runButton.set(!runButton.selected)}>{playButtonText}</button>
-      <button onClick={() => selectTool(bigWallBuilder)}>{bigWallBuilderText}</button>
+      <button onClick={() => selectTool(bigBrush)}>{bigBrushText}</button>
       <button onClick={() => selectTool(bigEraser)}>{bigEraserText}</button>
     </div>
   );
