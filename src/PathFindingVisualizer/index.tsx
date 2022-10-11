@@ -5,11 +5,11 @@ import "./PathFindingVisualizer.css";
 import ToolBar from "./ToolBar";
 import Grid from "./Grid"
 import Algorithm from "../algorithms/Algorithm";
-import BFS from "../algorithms/BFS";
+import Dijkstra from "../algorithms/Dijkstra";
 
 const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
-  const [algorithm, setAlgorithm] = useState<Algorithm>(new BFS());
+  const [algorithm, setAlgorithm] = useState<Algorithm>(new Dijkstra());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   const toggleIsRunning = () => {
@@ -20,8 +20,7 @@ const PathFindingVisualizer: React.FC = () => {
     <div className="screen-container">
       <header className="header">
         <ToolBar
-          isRunning={isRunning}
-          onVisualize={toggleIsRunning}
+          runButton={{on: isRunning, toggle: toggleIsRunning}}
           algorithm={algorithm}
           setAlgorithm={setAlgorithm}
           setAnimationSpeed={setAnimationSpeed}

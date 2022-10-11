@@ -37,7 +37,7 @@ const useGrid = (): useGridType => {
     }
 
     return {
-      row, col, state,
+      row, col, weight: 1, state,
     };
   }, []);
 
@@ -51,7 +51,7 @@ const useGrid = (): useGridType => {
       state = NODE_STATE.END;
     }
     return {
-      row, col, state,
+      row, col, weight: 1, state,
     };
   }
 

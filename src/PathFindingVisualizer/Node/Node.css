@@ -1,7 +1,9 @@
 .node {
   width: 23px;
   height: 23px;
-  display: inline-block;
+  text-align: center;
+  font-size: 0.8rem;
+  user-select: none;
   animation-timing-function: ease-in-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -144,10 +146,12 @@
 
   90% {
     transform: scale(1.3);
+    color: var(--darkest-blue);
     background-color: rgb(255, 254, 106);
   }
 
   100% {
+    color: var(--darkest-blue);
     transform: scale(1);
     background-color: rgb(255, 254, 106);
   }
@@ -168,6 +172,7 @@
   }
 
   60% {
+    color: white;
     background-color: rgba(0, 0, 66, 0.75);
   }
 
