@@ -13,7 +13,6 @@ export interface NodeType {
 interface NodeProps {
   row: number;
   col: number;
-  weight: number;
   state: string;
   onMouseDown: (row: number, col: number) => void;
   onMouseUp: () => void;
@@ -24,13 +23,12 @@ interface NodeProps {
 export const Node: React.FC<NodeProps> = ({
   row,
   col,
-  weight,
   state,
   onMouseDown,
   onMouseUp,
   onMouseEnter,
   onMouseLeave,
-}) => {
+}) => {  
   return (
     <td
       id={`node-${row}-${col}`}

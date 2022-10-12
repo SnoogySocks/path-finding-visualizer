@@ -13,6 +13,7 @@ import "./Grid.css";
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
+  isDroppingObstruction: number;
   isBrushing: boolean;
   isErasing: boolean;
   isErasingAlgorithm: boolean;
@@ -24,6 +25,7 @@ interface GridProps {
 const Grid: React.FC<GridProps> = ({
   isRunning,
   setIsRunning,
+  isDroppingObstruction,
   isBrushing,
   isErasing,
   isErasingAlgorithm,
@@ -140,11 +142,11 @@ const Grid: React.FC<GridProps> = ({
       // Start toggling cells between wall and none
     } else if (!hasDisplayedPath) {
       if (isBrushing) {
-        brush(grid, row, col);
+        brush(grid, row, col, isDroppingObstruction);
       } else if (isErasing) {
         erase(grid, row, col);
       } else {
-        toggleCellWall(grid, row, col);
+        toggleCellWall(grid, row, col, isDroppingObstruction);
       }
       setPreviousNode(grid[row][col]);
     }
@@ -170,11 +172,11 @@ const Grid: React.FC<GridProps> = ({
       (previousNode!.row !== row || previousNode!.col !== col)
     ) {
       if (isBrushing) {
-        brush(grid, row, col);
+        brush(grid, row, col, isDroppingObstruction);
       } else if (isErasing) {
         erase(grid, row, col);
       } else {
-        toggleCellWall(grid, row, col);
+        toggleCellWall(grid, row, col, isDroppingObstruction);
       }
       setPreviousNode(grid[row][col]);
     }
@@ -226,9 +228,9 @@ const Grid: React.FC<GridProps> = ({
   // detect an update inside isErasingAlgorithm
   useEffect(() => {
     if (isErasingAlgorithm && !isRunning) {
-      setIsErasingAlgorithm(false);
       clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
     }
+    setIsErasingAlgorithm(false);
   }, [isErasingAlgorithm]);
 
   return (
@@ -243,7 +245,6 @@ const Grid: React.FC<GridProps> = ({
                     key={nodeIdx}
                     row={node.row}
                     col={node.col}
-                    weight={node.weight}
                     state={node.state!}
                     onMouseDown={(row, col) => handleMouseDown(row, col)}
                     onMouseUp={handleMouseUp}

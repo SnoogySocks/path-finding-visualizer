@@ -5,9 +5,9 @@ import { NodeType } from "../Node";
 import { NODE_STATE, SPECIAL_STATES, BIG_RADIUS } from "../../constants";
 
 interface useDrawType {
-  toggleCellWall: (grid: NodeType[][], row: number, col: number) => void;
-  brush: (grid: NodeType[][], row: number, col: number) => void;
-  erase: (grid: NodeType[][], row: number, col: number) => void;
+  toggleCellWall: (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) => void;
+  brush: (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) => void;
+  erase: (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) => void;
 }
 
 const useDraw = (
@@ -29,14 +29,14 @@ const useDraw = (
   };
 
   // Create a new grid with grid[row][col] toggled between a wall or none
-  const toggleCellWall = (grid: NodeType[][], row: number, col: number) => {
-    let wall =
-      grid[row][col].state === NODE_STATE.WALL
-        ? NODE_STATE.WALL
-        : NODE_STATE.WALL_REVERSE;
+  const toggleCellWall = (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) => {
+    let obstruction =
+      grid[row][col].state === NODE_STATE.OBSTRUCTION[isDroppingObstruction]
+        ? NODE_STATE.OBSTRUCTION[isDroppingObstruction]
+        : NODE_STATE.OBSTRUCTION_REVERSE[isDroppingObstruction]
     setCell({
       ...grid[row][col],
-      state: toggleReverseState(wall),
+      state: toggleReverseState(obstruction),
     });
   };
 
@@ -74,11 +74,11 @@ const useDraw = (
     setGrid(newGrid);
   };
 
-  const brush = (grid: NodeType[][], row: number, col: number) =>
-    writeState(grid, row, col, NODE_STATE.WALL);
+  const brush = (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) =>
+    writeState(grid, row, col, NODE_STATE.OBSTRUCTION[isDroppingObstruction]);
 
-  const erase = (grid: NodeType[][], row: number, col: number) =>
-    writeState(grid, row, col, NODE_STATE.WALL_REVERSE);
+  const erase = (grid: NodeType[][], row: number, col: number, isDroppingObstruction: number) =>
+    writeState(grid, row, col, NODE_STATE.OBSTRUCTION_REVERSE[isDroppingObstruction]);
 
   return { toggleCellWall, brush, erase };
 };

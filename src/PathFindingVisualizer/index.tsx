@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 // local imports
 import "./PathFindingVisualizer.css";
@@ -11,6 +11,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
 
   // Tools
+  const [isDroppingObstruction, setIsDroppingObstruction] = useState(0);
   const [isBrushing, setIsBrushing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
@@ -22,11 +23,12 @@ const PathFindingVisualizer: React.FC = () => {
     <div className="screen-container">
       <header className="header">
         <ToolBar
-          runButton={{selected: isRunning, set: setIsRunning}}
-          isBrushing={{selected: isBrushing, set: setIsBrushing}}
-          isErasing={{selected: isErasing, set: setIsErasing}}
-          isErasingAlgorithm={{selected: isErasingAlgorithm, set: setIsErasingAlgorithm}}
-          algorithm={{val: algorithm, set: setAlgorithm}}
+          runButton={{ val: isRunning, set: setIsRunning }}
+          isDroppingObstruction={{ val: isDroppingObstruction, set: setIsDroppingObstruction}}
+          isBrushing={{ val: isBrushing, set: setIsBrushing }}
+          isErasing={{ val: isErasing, set: setIsErasing }}
+          isErasingAlgorithm={{ val: isErasingAlgorithm, set: setIsErasingAlgorithm }}
+          algorithm={{ val: algorithm, set: setAlgorithm }}
           setAnimationSpeed={setAnimationSpeed}
         />
       </header>
@@ -34,6 +36,7 @@ const PathFindingVisualizer: React.FC = () => {
         <Grid
           isRunning={isRunning}
           setIsRunning={setIsRunning}
+          isDroppingObstruction={isDroppingObstruction}
           isBrushing={isBrushing}
           isErasing={isErasing}
           isErasingAlgorithm={isErasingAlgorithm}
