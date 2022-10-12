@@ -13,7 +13,7 @@ interface useDrawType {
 const useDraw = (
   setGrid: (grid: NodeType[][]) => void,
   setCell: (node: NodeType) => void
-) => {
+): useDrawType => {
   const toggleReverseState = (state: string): string => {
     // const newState = state.split(" ")[1];
     // if ([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH, NODE_STATE.WALL].includes(newState)) {

@@ -18,6 +18,7 @@ interface ToolBarProps {
   runButton: Tool;
   isBrushing: Tool;
   isErasing: Tool;
+  isErasingAlgorithm: Tool;
   algorithm: DropDown<Algorithm>;
   setAnimationSpeed: (speed: number) => void;
 }
@@ -26,14 +27,16 @@ const ToolBar: React.FC<ToolBarProps> = ({
   runButton,
   isBrushing,
   isErasing,
+  isErasingAlgorithm,
   algorithm,
   setAnimationSpeed,
 }) => {
   const playButtonText = runButton.selected ? "ABORT" : "PLAY";
-  const isBrushingText = isBrushing.selected ? "BIG isBrushing" : "SMALL isBrushing";
-  const isErasingText = isErasing.selected ? "BIG isErasing" : "SMALL isErasing";
+  const isBrushingText = isBrushing.selected ? "BIG BRUSH" : "SMALL BRUSH";
+  const isErasingText = isErasing.selected ? "BIG ERASER" : "SMALL ERASER";
+  const isErasingAlgorithmText = "ERASE ALGORITHM";
 
-  // Deselect all tools and only select the one that was clicked
+  // Deselect all tools and only select the one that was selected
   const selectTool = (tool: Tool) => {
     for (const t of [isBrushing, isErasing]) {
       if (t !== tool) {
@@ -48,6 +51,7 @@ const ToolBar: React.FC<ToolBarProps> = ({
       <button onClick={() => runButton.set(!runButton.selected)}>{playButtonText}</button>
       <button onClick={() => selectTool(isBrushing)}>{isBrushingText}</button>
       <button onClick={() => selectTool(isErasing)}>{isErasingText}</button>
+      <button onClick={() => isErasingAlgorithm.set(true)}>{isErasingAlgorithmText}</button>
     </div>
   );
 };

@@ -32,7 +32,7 @@ export const DELTA = [
 
 export const ANIMATION_SPEED = {
     STEPS: 8,
-    SHORTEST_PATH: 20,
+    SHORTEST_PATH: 30,
 }
 
 export const BIG_RADIUS = 1;

@@ -15,6 +15,8 @@ interface GridProps {
   setIsRunning: (isRunning: boolean) => void;
   isBrushing: boolean;
   isErasing: boolean;
+  isErasingAlgorithm: boolean;
+  setIsErasingAlgorithm: (isErasingAlgorithm: boolean) => void;
   algorithm: Algorithm;
   animationSpeed: number;
 }
@@ -24,6 +26,8 @@ const Grid: React.FC<GridProps> = ({
   setIsRunning,
   isBrushing,
   isErasing,
+  isErasingAlgorithm,
+  setIsErasingAlgorithm,
   algorithm,
   animationSpeed,
 }) => {
@@ -218,6 +222,14 @@ const Grid: React.FC<GridProps> = ({
 
   // hasProcessedSteps must be the same as isRunning
   useEffect(() => setHasProcessedSteps(isRunning), [isRunning]);
+
+  // detect an update inside isErasingAlgorithm
+  useEffect(() => {
+    if (isErasingAlgorithm && !isRunning) {
+      setIsErasingAlgorithm(false);
+      clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+    }
+  }, [isErasingAlgorithm]);
 
   return (
     <div className="grid-container">

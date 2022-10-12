@@ -13,6 +13,7 @@ const PathFindingVisualizer: React.FC = () => {
   // Tools
   const [isBrushing, setIsBrushing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
+  const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
 
   const [algorithm, setAlgorithm] = useState<Algorithm>(new Dijkstra());
   const [animationSpeed, setAnimationSpeed] = useState(1);
@@ -24,6 +25,7 @@ const PathFindingVisualizer: React.FC = () => {
           runButton={{selected: isRunning, set: setIsRunning}}
           isBrushing={{selected: isBrushing, set: setIsBrushing}}
           isErasing={{selected: isErasing, set: setIsErasing}}
+          isErasingAlgorithm={{selected: isErasingAlgorithm, set: setIsErasingAlgorithm}}
           algorithm={{val: algorithm, set: setAlgorithm}}
           setAnimationSpeed={setAnimationSpeed}
         />
@@ -34,6 +36,8 @@ const PathFindingVisualizer: React.FC = () => {
           setIsRunning={setIsRunning}
           isBrushing={isBrushing}
           isErasing={isErasing}
+          isErasingAlgorithm={isErasingAlgorithm}
+          setIsErasingAlgorithm={setIsErasingAlgorithm}
           algorithm={algorithm}
           animationSpeed={animationSpeed}
         />
