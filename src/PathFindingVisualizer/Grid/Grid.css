@@ -26,6 +26,7 @@
 
 .grid-border td {
   display: table-cell;
+  position: relative;
   padding: 0;
   min-width: 23px;
   min-height: 23px;

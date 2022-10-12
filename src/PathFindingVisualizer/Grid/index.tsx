@@ -2,7 +2,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 // local imports
-import { START_END_COORDS, NODE_STATE, SPECIAL_STATES, ANIMATION_SPEED } from "../../constants";
+import {
+  START_END_COORDS,
+  NODE_STATE,
+  SPECIAL_STATES,
+  ANIMATION_SPEED,
+} from "../../constants";
 import useGrid from "./useGrid";
 import useDraggedNode from "./useDraggedNode";
 import useDraw from "./useDraw";
@@ -57,17 +62,18 @@ const Grid: React.FC<GridProps> = ({
 
   // Clear state and states that prevent grid interaction after visualization
   const clearCache = useCallback(() => {
-      clearGridState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH], draggedNode!);
-      for (let i = 0; i < pendingAnimations.length; ++i) {
-        clearTimeout(pendingAnimations[i]);
-      }
+    clearGridState(
+      [NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH],
+      draggedNode!
+    );
+    for (let i = 0; i < pendingAnimations.length; ++i) {
+      clearTimeout(pendingAnimations[i]);
+    }
 
-      setHasDisplayedPath(false);
-      setHasProcessedSteps(false);
-      setPendingAnimations([]);
-    },
-    [clearGridState, pendingAnimations]
-  );
+    setHasDisplayedPath(false);
+    setHasProcessedSteps(false);
+    setPendingAnimations([]);
+  }, [clearGridState, pendingAnimations]);
 
   // visualize the algorithm on the grid
   // ! grid, startCoords, algorithm, and animationSpeed cannot be changed while running
@@ -91,7 +97,7 @@ const Grid: React.FC<GridProps> = ({
     for (let i = 0; i < steps.length; ++i) {
       animations.push(
         setTimeout(() => {
-          setCellDOM({ ...steps[i], state: `${steps[i].state} ${NODE_STATE.VISITED}` });
+          setCellDOM({ ...steps[i], state: NODE_STATE.VISITED });
         }, ANIMATION_SPEED.STEPS * i * animationSpeed)
       );
     }
@@ -102,7 +108,7 @@ const Grid: React.FC<GridProps> = ({
         setTimeout(() => {
           setCellDOM({
             ...shortestPath[i],
-            state: `${shortestPath[i].state} ${NODE_STATE.SHORTEST_PATH}`,
+            state: NODE_STATE.SHORTEST_PATH,
           });
         }, (ANIMATION_SPEED.SHORTEST_PATH * i + ANIMATION_SPEED.STEPS * steps.length) * animationSpeed)
       );

@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useCallback} from "react";
-import {NodeType} from "../Node";
+import React, { useState, useEffect, useCallback } from "react";
+import { NodeType } from "../Node";
 
 // import local files
-import {START_END_COORDS, GRID_SIZE, NODE_STATE} from "../../constants"
+import { START_END_COORDS, GRID_SIZE, NODE_STATE } from "../../constants";
 
 interface useGridType {
   grid: NodeType[][];
@@ -17,85 +17,108 @@ const useGrid = (): useGridType => {
 
   const initNode = useCallback((row: number, col: number): NodeType => {
     let state = "";
-    if (row===START_END_COORDS.START_NODE_ROW && col===START_END_COORDS.START_NODE_COL) {
+    if (
+      row === START_END_COORDS.START_NODE_ROW &&
+      col === START_END_COORDS.START_NODE_COL
+    ) {
       state = NODE_STATE.START;
-    } else if (row===START_END_COORDS.END_NODE_ROW && col===START_END_COORDS.END_NODE_COL) {
+    } else if (
+      row === START_END_COORDS.END_NODE_ROW &&
+      col === START_END_COORDS.END_NODE_COL
+    ) {
       state = NODE_STATE.END;
     }
 
     return {
-      row, col, weight: 1, state,
+      row,
+      col,
+      weight: 1,
+      state,
     };
   }, []);
 
   const initNodeFromDOM = (row: number, col: number): NodeType => {
     let state = "";
-    const node = document.getElementById(`node-${row}-${col}`)?.
-        className.substring(NODE_STATE.DEFAULT.length+1);
-    if (node===NODE_STATE.START || node===NODE_STATE.END) {
+    const node = document
+      .getElementById(`node-${row}-${col}`)
+      ?.className.substring(NODE_STATE.DEFAULT.length + 1);
+    if (node === NODE_STATE.START || node === NODE_STATE.END) {
       state = node;
     }
     return {
-      row, col, weight: 1, state,
+      row,
+      col,
+      weight: 1,
+      state,
     };
-  }
+  };
 
   const initGrid = useCallback(() => {
-      let grid = new Array(GRID_SIZE.ROW_SIZE);
-      for (let r = 0; r<grid.length; ++r) {
-        grid[r] = new Array(GRID_SIZE.COL_SIZE);
-        for (let c = 0; c<grid[r].length; ++c) {
-          grid[r][c] = initNode(r, c);
-        }
+    let grid = new Array(GRID_SIZE.ROW_SIZE);
+    for (let r = 0; r < grid.length; ++r) {
+      grid[r] = new Array(GRID_SIZE.COL_SIZE);
+      for (let c = 0; c < grid[r].length; ++c) {
+        grid[r][c] = initNode(r, c);
       }
-      return grid;
+    }
+    return grid;
   }, []);
 
   // Create a new grid with grid[row][col] modified to value
-  const setCell = useCallback((node: NodeType) => {
-    let newGrid = new Array(grid.length);
-    for (let r = 0; r<grid.length; ++r) {
-      newGrid[r] = [...grid[r]];
-    }
-    newGrid[node.row][node.col] = node;
-    setGrid(newGrid)
-  }, [grid]);
+  const setCell = useCallback(
+    (node: NodeType) => {
+      let newGrid = new Array(grid.length);
+      for (let r = 0; r < grid.length; ++r) {
+        newGrid[r] = [...grid[r]];
+      }
+      newGrid[node.row][node.col] = node;
+      setGrid(newGrid);
+    },
+    [grid]
+  );
 
   const setCellDOM = (node: NodeType) => {
     document.getElementById(
       `node-${node.row}-${node.col}`
-    )!.className = `${NODE_STATE.DEFAULT} ${node.state}`;
+    )!.className = `top ${NODE_STATE.DEFAULT} ${node.state}`;
   };
 
   // Takes a list of states to clear from the grid
-  const clearGridState = useCallback((statesToClear: string[], draggedNode: NodeType): boolean => {
-    let hasToggled = false;
+  const clearGridState = useCallback(
+    (statesToClear: string[], draggedNode: NodeType): boolean => {
+      let hasToggled = false;
 
-    for (let r = 0; r<grid.length; ++r) {
-      for (let c = 0; c < grid[r].length; ++c) {
-        const {row, col} = initNodeFromDOM(r, c);
-        const node = document.getElementById(`node-${row}-${col}`)!;
+      for (let r = 0; r < grid.length; ++r) {
+        for (let c = 0; c < grid[r].length; ++c) {
+          const { row, col } = initNodeFromDOM(r, c);
+          const node = document.getElementById(`node-${row}-${col}`)!;
 
-        for (let stateToClear of statesToClear) {
-          // Toggle the current node's state to its reverse animation unless
-          // it is the dragged node then don't.
-          if (node.className.split(" ").includes(stateToClear)
-              && (!draggedNode || draggedNode.row!==row || draggedNode.col!==col)) {
-            node.className = node.className+"-reverse";
-            hasToggled = true;
+          for (let stateToClear of statesToClear) {
+            // Toggle the current node's state to its reverse animation unless
+            // it is the dragged node then don't.
+            if (
+              node.className.split(" ").includes(stateToClear) &&
+              (!draggedNode ||
+                draggedNode.row !== row ||
+                draggedNode.col !== col)
+            ) {
+              node.className = node.className + "-reverse";
+              hasToggled = true;
+            }
           }
         }
       }
-    }
 
-    return hasToggled;
-  }, [grid]);
+      return hasToggled;
+    },
+    [grid]
+  );
 
   useEffect(() => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  return {grid, setGrid, setCell, setCellDOM, clearGridState};
-}
+  return { grid, setGrid, setCell, setCellDOM, clearGridState };
+};
 
 export default useGrid;

@@ -45,12 +45,13 @@ const useDraw = (
     col: number,
     droppedObstruction: number
   ) => {
-    let obstruction =
+    let [weight, obstruction] =
       grid[row][col].state === NODE_STATE.OBSTRUCTION[droppedObstruction]
-        ? NODE_STATE.OBSTRUCTION[droppedObstruction]
-        : NODE_STATE.OBSTRUCTION_REVERSE[droppedObstruction];
+        ? [1, NODE_STATE.OBSTRUCTION[droppedObstruction]]
+        : [4 ** droppedObstruction, NODE_STATE.OBSTRUCTION_REVERSE[droppedObstruction]];
     setCell({
       ...grid[row][col],
+      weight,
       state: toggleReverseState(obstruction),
     });
   };
@@ -73,10 +74,14 @@ const useDraw = (
           !SPECIAL_STATES.includes(grid[r][c].state) &&
           (row - r) ** 2 + (col - c) ** 2 <= BIG_RADIUS ** 2
         ) {
+          let droppedObstruction = NODE_STATE.OBSTRUCTION.indexOf(state);
           newGridRow[c] = {
             ...grid[r][c],
+            weight: droppedObstruction === -1 ? 1 : 4 ** droppedObstruction,
             state:
-              state == "" && grid[r][c].state!="" && !grid[r][c].state.includes("-reverse")
+              state == "" &&
+              grid[r][c].state != "" &&
+              !grid[r][c].state.includes("-reverse")
                 ? grid[r][c].state + "-reverse"
                 : state,
           };

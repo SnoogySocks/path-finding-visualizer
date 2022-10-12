@@ -28,15 +28,19 @@ export const Node: React.FC<NodeProps> = ({
   onMouseUp,
   onMouseEnter,
   onMouseLeave,
-}) => {  
+}) => {
   return (
     <td
-      id={`node-${row}-${col}`}
-      className={`${NODE_STATE.DEFAULT} ${state}`}
       onMouseDown={() => onMouseDown(row, col)}
       onMouseUp={onMouseUp}
       onMouseEnter={() => onMouseEnter(row, col)}
       onMouseLeave={() => onMouseLeave(row, col)}
-    /> //{weight}</td>
+    >
+      <div
+        id={`node-${row}-${col}`}
+        className={`top ${NODE_STATE.DEFAULT}`}
+      />
+      <div className={`${NODE_STATE.DEFAULT} ${state}`} />
+    </td>
   );
 };
