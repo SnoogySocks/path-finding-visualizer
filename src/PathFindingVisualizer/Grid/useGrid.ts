@@ -79,7 +79,7 @@ const useGrid = (): useGridType => {
         for (let stateToClear of statesToClear) {
           // Toggle the current node's state to its reverse animation unless
           // it is the dragged node then don't.
-          if (`${NODE_STATE.DEFAULT} ${stateToClear}`===node.className
+          if (node.className.split(" ").includes(stateToClear)
               && (!draggedNode || draggedNode.row!==row || draggedNode.col!==col)) {
             node.className = node.className+"-reverse";
             hasToggled = true;

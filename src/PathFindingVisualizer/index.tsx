@@ -11,7 +11,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
 
   // Tools
-  const [isDroppingObstruction, setIsDroppingObstruction] = useState(0);
+  const [droppedObstruction, setDroppedObstruction] = useState(0);
   const [isBrushing, setIsBrushing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
@@ -24,7 +24,7 @@ const PathFindingVisualizer: React.FC = () => {
       <header className="header">
         <ToolBar
           runButton={{ val: isRunning, set: setIsRunning }}
-          isDroppingObstruction={{ val: isDroppingObstruction, set: setIsDroppingObstruction}}
+          droppedObstruction={{ val: droppedObstruction, set: setDroppedObstruction}}
           isBrushing={{ val: isBrushing, set: setIsBrushing }}
           isErasing={{ val: isErasing, set: setIsErasing }}
           isErasingAlgorithm={{ val: isErasingAlgorithm, set: setIsErasingAlgorithm }}
@@ -36,7 +36,7 @@ const PathFindingVisualizer: React.FC = () => {
         <Grid
           isRunning={isRunning}
           setIsRunning={setIsRunning}
-          isDroppingObstruction={isDroppingObstruction}
+          droppedObstruction={droppedObstruction}
           isBrushing={isBrushing}
           isErasing={isErasing}
           isErasingAlgorithm={isErasingAlgorithm}

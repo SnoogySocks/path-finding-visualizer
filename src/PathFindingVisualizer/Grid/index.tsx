@@ -13,7 +13,7 @@ import "./Grid.css";
 interface GridProps {
   isRunning: boolean;
   setIsRunning: (isRunning: boolean) => void;
-  isDroppingObstruction: number;
+  droppedObstruction: number;
   isBrushing: boolean;
   isErasing: boolean;
   isErasingAlgorithm: boolean;
@@ -25,7 +25,7 @@ interface GridProps {
 const Grid: React.FC<GridProps> = ({
   isRunning,
   setIsRunning,
-  isDroppingObstruction,
+  droppedObstruction,
   isBrushing,
   isErasing,
   isErasingAlgorithm,
@@ -56,9 +56,8 @@ const Grid: React.FC<GridProps> = ({
   const { toggleCellWall, brush, erase } = useDraw(setGrid, setCell);
 
   // Clear state and states that prevent grid interaction after visualization
-  const clearCache = useCallback(
-    (statesToClear: string[]) => {
-      clearGridState(statesToClear, draggedNode!);
+  const clearCache = useCallback(() => {
+      clearGridState([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH], draggedNode!);
       for (let i = 0; i < pendingAnimations.length; ++i) {
         clearTimeout(pendingAnimations[i]);
       }
@@ -92,7 +91,7 @@ const Grid: React.FC<GridProps> = ({
     for (let i = 0; i < steps.length; ++i) {
       animations.push(
         setTimeout(() => {
-          setCellDOM({ ...steps[i], state: `${NODE_STATE.VISITED}` });
+          setCellDOM({ ...steps[i], state: `${steps[i].state} ${NODE_STATE.VISITED}` });
         }, ANIMATION_SPEED.STEPS * i * animationSpeed)
       );
     }
@@ -103,7 +102,7 @@ const Grid: React.FC<GridProps> = ({
         setTimeout(() => {
           setCellDOM({
             ...shortestPath[i],
-            state: `${NODE_STATE.SHORTEST_PATH}`,
+            state: `${shortestPath[i].state} ${NODE_STATE.SHORTEST_PATH}`,
           });
         }, (ANIMATION_SPEED.SHORTEST_PATH * i + ANIMATION_SPEED.STEPS * steps.length) * animationSpeed)
       );
@@ -136,17 +135,17 @@ const Grid: React.FC<GridProps> = ({
     if (SPECIAL_STATES.includes(grid[row][col].state)) {
       dragStart(grid, row, col);
       if (hasDisplayedPath) {
-        clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+        clearCache();
       }
 
       // Start toggling cells between wall and none
     } else if (!hasDisplayedPath) {
       if (isBrushing) {
-        brush(grid, row, col, isDroppingObstruction);
+        brush(grid, row, col, droppedObstruction);
       } else if (isErasing) {
         erase(grid, row, col);
       } else {
-        toggleCellWall(grid, row, col, isDroppingObstruction);
+        toggleCellWall(grid, row, col, droppedObstruction);
       }
       setPreviousNode(grid[row][col]);
     }
@@ -172,11 +171,11 @@ const Grid: React.FC<GridProps> = ({
       (previousNode!.row !== row || previousNode!.col !== col)
     ) {
       if (isBrushing) {
-        brush(grid, row, col, isDroppingObstruction);
+        brush(grid, row, col, droppedObstruction);
       } else if (isErasing) {
         erase(grid, row, col);
       } else {
-        toggleCellWall(grid, row, col, isDroppingObstruction);
+        toggleCellWall(grid, row, col, droppedObstruction);
       }
       setPreviousNode(grid[row][col]);
     }
@@ -212,7 +211,7 @@ const Grid: React.FC<GridProps> = ({
   useEffect(() => {
     // Clear the animation if visualizing but the user aborted
     if (!isRunning && hasProcessedSteps) {
-      clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+      clearCache();
       return;
 
       // run the algorithm if user pressed play
@@ -228,7 +227,7 @@ const Grid: React.FC<GridProps> = ({
   // detect an update inside isErasingAlgorithm
   useEffect(() => {
     if (isErasingAlgorithm && !isRunning) {
-      clearCache([NODE_STATE.VISITED, NODE_STATE.SHORTEST_PATH]);
+      clearCache();
     }
     setIsErasingAlgorithm(false);
   }, [isErasingAlgorithm]);

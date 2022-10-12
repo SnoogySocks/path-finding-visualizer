@@ -11,7 +11,7 @@ interface State<T> {
 
 interface ToolBarProps {
   runButton: State<boolean>;
-  isDroppingObstruction: State<number>;
+  droppedObstruction: State<number>;
   isBrushing: State<boolean>;
   isErasing: State<boolean>;
   isErasingAlgorithm: State<boolean>;
@@ -21,7 +21,7 @@ interface ToolBarProps {
 
 const ToolBar: React.FC<ToolBarProps> = ({
   runButton,
-  isDroppingObstruction,
+  droppedObstruction,
   isBrushing,
   isErasing,
   isErasingAlgorithm,
@@ -30,11 +30,11 @@ const ToolBar: React.FC<ToolBarProps> = ({
 }) => {
   const playButtonText = runButton.val ? "ABORT" : "PLAY";
   const isBrushingText = isBrushing.val ? "BIG BRUSH" : "SMALL BRUSH";
-  const isDroppingObstructionText =
-    isDroppingObstruction.val == 0 ? "WALLS"
-      : isDroppingObstruction.val == 1 ? "WEIGHTED 1"
-        : isDroppingObstruction.val == 2 ? "WEIGHTED 2"
-          : "WEIGHTED 3";
+  const droppedObstructionText =
+    droppedObstruction.val == 0 ? "WALLS"
+      : droppedObstruction.val == 1 ? "WEIGHT 1"
+        : droppedObstruction.val == 2 ? "WEIGHT 2"
+          : "WEIGHT 3";
   const isErasingText = isErasing.val ? "BIG ERASER" : "SMALL ERASER";
   const isErasingAlgorithmText = "ERASE ALGORITHM";
 
@@ -47,10 +47,9 @@ const ToolBar: React.FC<ToolBarProps> = ({
     } else if (tool == isBrushing) {
       isErasing.set(false);
       isBrushing.set(!isBrushing.val);
-    } else if (tool == isDroppingObstruction) {
+    } else if (tool == droppedObstruction) {
       isErasing.set(false);
-      isDroppingObstruction.set((isDroppingObstruction.val+1)%4);
-
+      droppedObstruction.set((droppedObstruction.val+1)%4);
     }
   }
 
@@ -59,7 +58,7 @@ const ToolBar: React.FC<ToolBarProps> = ({
       <button onClick={() => runButton.set(!runButton.val)}>{playButtonText}</button>
       <button onClick={() => selectTool(isBrushing)}>{isBrushingText}</button>
       {/* make a button to add weighted nodes */}
-      <button onClick={() => selectTool(isDroppingObstruction)}>{isDroppingObstructionText}</button>
+      <button onClick={() => selectTool(droppedObstruction)}>{droppedObstructionText}</button>
       <button onClick={() => selectTool(isErasing)}>{isErasingText}</button>
       <button onClick={() => isErasingAlgorithm.set(true)}>{isErasingAlgorithmText}</button>
     </div>

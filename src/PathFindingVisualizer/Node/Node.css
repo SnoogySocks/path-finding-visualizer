@@ -13,31 +13,80 @@
 }
 
 .node-weighted-1 {
-  animation-name: obstructionAnimation;
+  animation-name: weight1Animation;
+  animation-duration: 0.3s;
   background-color: var(--weight-1);
 }
 
 .node-weighted-2 {
-  animation-name: obstructionAnimation;
+  animation-name: weight2Animation;
+  animation-duration: 0.3s;
   background-color: var(--weight-2);
 }
 
 .node-weighted-3 {
-  animation-name: obstructionAnimation;
+  animation-name: weight3Animation;
+  animation-duration: 0.3s;
   background-color: var(--weight-3);
 }
 
 .node-weighted-1-reverse {
-  animation-name: weightAnimation1Reverse;
+  animation-name: weight1AnimationReverse;
+animation-duration: 0.3s;
 }
 
 .node-weighted-2-reverse {
-  animation-name: weightAnimation2Reverse;
+  animation-name: weight2AnimationReverse;
+  animation-duration: 0.3s;
 }
 
 .node-weighted-3-reverse {
-  animation-name: weightAnimation3Reverse;
+  animation-name: weight3AnimationReverse;
+  animation-duration: 0.3s;
 }
+
+@keyframes weight1Animation {
+  0% {
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes weight2Animation {
+  0% {
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes weight3Animation {
+  0% {
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 
 @keyframes weight1AnimationReverse {
   0% {
@@ -181,13 +230,11 @@
 .node-visited {
   animation-name: visitedAnimation;
   animation-duration: 2s;
-  background-color: rgba(0, 190, 218, 0.75);
 }
 
 @keyframes visitedAnimation {
-  0% {
+  25% {
     transform: scale(0.3);
-    background-color: rgba(0, 0, 66, 0.75);
     border-radius: 100%;
   }
 
@@ -225,10 +272,6 @@
   }
 
   60% {
-    background-color: rgba(0, 0, 66, 0.75);
-  }
-
-  100% {
     background-color: none;
   }
 }
@@ -269,11 +312,6 @@
 
   40% {
     background-color: rgba(17, 104, 217, 0.75);
-  }
-
-  60% {
-    color: white;
-    background-color: rgba(0, 0, 66, 0.75);
   }
 
   100% {
