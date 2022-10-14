@@ -8,6 +8,7 @@ interface useGridType {
   grid: NodeType[][];
   setGrid: React.Dispatch<React.SetStateAction<NodeType[][]>>;
   setCell: (node: NodeType) => void;
+  setCellTopDOM: (node: NodeType) => void;
   setCellDOM: (node: NodeType) => void;
   clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
 }
@@ -77,10 +78,16 @@ const useGrid = (): useGridType => {
     [grid]
   );
 
+  const setCellTopDOM = (node: NodeType) => {
+    document.getElementById(
+      `top-node-${node.row}-${node.col}`
+    )!.className = `top ${NODE_STATE.DEFAULT} ${node.state}`;
+  };
+
   const setCellDOM = (node: NodeType) => {
     document.getElementById(
       `node-${node.row}-${node.col}`
-    )!.className = `top ${NODE_STATE.DEFAULT} ${node.state}`;
+    )!.className = `${NODE_STATE.DEFAULT} ${node.state}`;
   };
 
   // Takes a list of states to clear from the grid
@@ -91,7 +98,7 @@ const useGrid = (): useGridType => {
       for (let r = 0; r < grid.length; ++r) {
         for (let c = 0; c < grid[r].length; ++c) {
           const { row, col } = initNodeFromDOM(r, c);
-          const node = document.getElementById(`node-${row}-${col}`)!;
+          const node = document.getElementById(`top-node-${row}-${col}`)!;
 
           for (let stateToClear of statesToClear) {
             // Toggle the current node's state to its reverse animation unless
@@ -118,7 +125,7 @@ const useGrid = (): useGridType => {
     setGrid(initGrid());
   }, [initGrid]);
 
-  return { grid, setGrid, setCell, setCellDOM, clearGridState };
+  return { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState };
 };
 
 export default useGrid;

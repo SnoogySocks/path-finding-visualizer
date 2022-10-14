@@ -38,20 +38,24 @@ export default class Dijkstra extends Algorithm {
 
     while (queue.size() > 0) {
       const prevNode = queue.pop()!;
+      if (prevNode !== start) {
+        steps.push(prevNode);
+      }
+
       for (const [dr, dc] of DELTA) {
         let [r, c] = [prevNode.row + dr, prevNode.col + dc];
+
+        // Record all the visited nodes in the algorithm
         let adjNode = grid[r]?.[c];
 
         // Invalid if out of bounds or a wall or is already visited
         if (
           !inBounds(grid, r, c) ||
           adjNode.state === NODE_STATE.WALL ||
-          dis[r][c] <= dis[prevNode.row][prevNode.col]+adjNode.weight
+          dis[r][c] <= dis[prevNode.row][prevNode.col] + adjNode.weight
         )
           continue;
 
-        // Record all the visited nodes in the algorithm
-        steps.push(adjNode);
         // Add the previous distance with the distance now
         dis[r][c] = dis[prevNode.row][prevNode.col] + adjNode.weight;
         // previousNode is a parent node to grid[r][c]
@@ -60,7 +64,6 @@ export default class Dijkstra extends Algorithm {
         if (adjNode.state !== NODE_STATE.END) {
           queue.push({ ...adjNode, weight: dis[r][c] });
         } else {
-          steps.pop();
           return { steps, shortestPath: findShortestPath(parents, adjNode) };
         }
       }

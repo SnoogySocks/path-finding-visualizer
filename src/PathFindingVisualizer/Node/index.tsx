@@ -37,10 +37,13 @@ export const Node: React.FC<NodeProps> = ({
       onMouseLeave={() => onMouseLeave(row, col)}
     >
       <div
-        id={`node-${row}-${col}`}
+        id={`top-node-${row}-${col}`}
         className={`top ${NODE_STATE.DEFAULT}`}
       />
-      <div className={`${NODE_STATE.DEFAULT} ${state}`} />
+      <div
+        id={`node-${row}-${col}`}
+        className={`${NODE_STATE.DEFAULT} ${state}`}
+      />
     </td>
   );
 };

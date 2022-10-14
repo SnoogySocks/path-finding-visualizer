@@ -38,7 +38,7 @@ const Grid: React.FC<GridProps> = ({
   algorithm,
   animationSpeed,
 }) => {
-  const { grid, setGrid, setCell, setCellDOM, clearGridState } = useGrid();
+  const { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState } = useGrid();
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
@@ -97,7 +97,7 @@ const Grid: React.FC<GridProps> = ({
     for (let i = 0; i < steps.length; ++i) {
       animations.push(
         setTimeout(() => {
-          setCellDOM({ ...steps[i], state: NODE_STATE.VISITED });
+          setCellTopDOM({ ...steps[i], state: NODE_STATE.VISITED });
         }, ANIMATION_SPEED.STEPS * i * animationSpeed)
       );
     }
@@ -106,7 +106,7 @@ const Grid: React.FC<GridProps> = ({
     for (let i = 0; i < shortestPath.length; ++i) {
       animations.push(
         setTimeout(() => {
-          setCellDOM({
+          setCellTopDOM({
             ...shortestPath[i],
             state: NODE_STATE.SHORTEST_PATH,
           });
@@ -199,7 +199,7 @@ const Grid: React.FC<GridProps> = ({
 
     // don't remove previous node if it's START or END
     if (grid[row][col].state !== oppositeSide) {
-      setCellDOM({ ...grid[row][col], state: "" });
+      setCellDOM(grid[row][col]);
     }
   };
 
