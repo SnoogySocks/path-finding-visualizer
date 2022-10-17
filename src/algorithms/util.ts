@@ -116,7 +116,7 @@ export class Queue {
     }
     
     pop(){
-      return this._queue.unshift()
+      return this._queue.shift();
     }
 }
 
