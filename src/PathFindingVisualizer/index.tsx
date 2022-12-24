@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, createRef } from "react";
 
 // local imports
 import "./PathFindingVisualizer.css";
@@ -7,6 +7,23 @@ import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 import BFS from "../algorithms/BFS";
+import { NODE_SIZE } from "../constants";
+
+const useRefDimensions = (ref: React.RefObject<HTMLDivElement>) => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    if (!ref.current) {
+      console.error("ref.current is null");
+      return;
+    }
+    const boundingRect = ref.current.getBoundingClientRect();
+    const { width, height } = boundingRect;
+    setDimensions({ width: Math.round(width), height: Math.round(height) });
+    console.log(width, height);
+  }, []);
+
+  return dimensions;
+};
 
 const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -19,6 +36,9 @@ const PathFindingVisualizer: React.FC = () => {
 
   const [algorithm, setAlgorithm] = useState(new Dijkstra());
   const [animationSpeed, setAnimationSpeed] = useState(1);
+
+  const ref = createRef<HTMLDivElement>();
+  const { width: contentWidth, height: contentHeight } = useRefDimensions(ref);
 
   return (
     <div className="screen-container">
@@ -39,7 +59,7 @@ const PathFindingVisualizer: React.FC = () => {
           setAnimationSpeed={setAnimationSpeed}
         />
       </header>
-      <div className="content">
+      <div className="content" ref={ref}>
         <Grid
           isRunning={isRunning}
           setIsRunning={setIsRunning}
@@ -48,6 +68,8 @@ const PathFindingVisualizer: React.FC = () => {
           isErasing={isErasing}
           isErasingAlgorithm={isErasingAlgorithm}
           setIsErasingAlgorithm={setIsErasingAlgorithm}
+          cols={Math.floor(contentWidth / NODE_SIZE)}
+          rows={Math.floor(contentHeight / NODE_SIZE)}
           algorithm={algorithm}
           animationSpeed={animationSpeed}
         />

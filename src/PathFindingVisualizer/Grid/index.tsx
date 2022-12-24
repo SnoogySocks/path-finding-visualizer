@@ -23,6 +23,8 @@ interface GridProps {
   isErasing: boolean;
   isErasingAlgorithm: boolean;
   setIsErasingAlgorithm: (isErasingAlgorithm: boolean) => void;
+  rows: number;
+  cols: number;
   algorithm: Algorithm;
   animationSpeed: number;
 }
@@ -35,10 +37,13 @@ const Grid: React.FC<GridProps> = ({
   isErasing,
   isErasingAlgorithm,
   setIsErasingAlgorithm,
+  rows,
+  cols,
   algorithm,
   animationSpeed,
 }) => {
-  const { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState } = useGrid();
+  const { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState } =
+    useGrid(rows, cols);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);

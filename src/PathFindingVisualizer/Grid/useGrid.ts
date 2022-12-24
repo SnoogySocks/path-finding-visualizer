@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { NodeType } from "../Node";
 
 // import local files
-import { START_END_COORDS, GRID_SIZE, NODE_STATE } from "../../constants";
+import { START_END_COORDS, NODE_STATE } from "../../constants";
 
 interface useGridType {
   grid: NodeType[][];
@@ -13,7 +13,7 @@ interface useGridType {
   clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
 }
 
-const useGrid = (): useGridType => {
+const useGrid = (rows: number, cols: number): useGridType => {
   const [grid, setGrid] = useState<NodeType[][]>([]);
 
   const initNode = useCallback((row: number, col: number): NodeType => {
@@ -55,9 +55,9 @@ const useGrid = (): useGridType => {
   };
 
   const initGrid = useCallback(() => {
-    let grid = new Array(GRID_SIZE.ROW_SIZE);
+    let grid = new Array(rows);
     for (let r = 0; r < grid.length; ++r) {
-      grid[r] = new Array(GRID_SIZE.COL_SIZE);
+      grid[r] = new Array(cols);
       for (let c = 0; c < grid[r].length; ++c) {
         grid[r][c] = initNode(r, c);
       }
