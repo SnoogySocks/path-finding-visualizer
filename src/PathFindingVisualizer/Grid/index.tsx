@@ -49,8 +49,8 @@ const Grid: React.FC<GridProps> = ({
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
   const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState<NodeType>({
-    row: 4,
-    col: 10,
+    row: START_END_COORDS.START_NODE_ROW,
+    col: START_END_COORDS.START_NODE_COL,
     weight: 1,
     state: NODE_STATE.START,
   });

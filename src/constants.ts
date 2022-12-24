@@ -5,9 +5,9 @@ export const START_END_COORDS = {
   END_NODE_COL: 30,
 };
 
-export const GRID_SIZE = {
-  ROW_SIZE: 20,
-  COL_SIZE: 50,
+export const GRID_PADDING = {
+  ROW: 15,
+  COL: 10,
 };
 
 export const NODE_SIZE = 23;
