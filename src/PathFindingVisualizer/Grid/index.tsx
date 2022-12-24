@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 
 // local imports
 import {
-  START_END_COORDS,
+  START_END_RATIO,
   NODE_STATE,
   SPECIAL_STATES,
   ANIMATION_SPEED,
@@ -49,8 +49,8 @@ const Grid: React.FC<GridProps> = ({
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
   const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState<NodeType>({
-    row: START_END_COORDS.START_NODE_ROW,
-    col: START_END_COORDS.START_NODE_COL,
+    row: Math.floor(rows * START_END_RATIO.START.ROW),
+    col: Math.floor(cols * START_END_RATIO.START.COL),
     weight: 1,
     state: NODE_STATE.START,
   });
