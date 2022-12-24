@@ -7,8 +7,9 @@ import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 import BFS from "../algorithms/BFS";
-import { GRID_PADDING, NODE_SIZE } from "../constants";
+import { GRID_PADDING, NODE_SIZE, SM } from "../constants";
 
+// Find the dimensions of a div element
 const useRefDimensions = (ref: React.RefObject<HTMLDivElement>) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   useLayoutEffect(() => {
@@ -68,14 +69,17 @@ const PathFindingVisualizer: React.FC = () => {
           isErasing={isErasing}
           isErasingAlgorithm={isErasingAlgorithm}
           setIsErasingAlgorithm={setIsErasingAlgorithm}
+          // scuffed responsive layout
           rows={
             contentHeight
-              ? Math.floor(contentHeight / NODE_SIZE) - GRID_PADDING.ROW
+              ? Math.floor(contentHeight / NODE_SIZE) -
+                (contentWidth >= SM ? GRID_PADDING.ROW : GRID_PADDING.ROW_SM)
               : 0
           }
           cols={
             contentWidth
-              ? Math.floor(contentWidth / NODE_SIZE) - GRID_PADDING.COL
+              ? Math.floor(contentWidth / NODE_SIZE) -
+                (contentWidth >= SM ? GRID_PADDING.COL : GRID_PADDING.COL_SM)
               : 0
           }
           algorithm={algorithm}
