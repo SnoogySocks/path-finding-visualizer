@@ -3,7 +3,7 @@ import React, { useState } from "react";
 // local imports
 import "./PathFindingVisualizer.css";
 import ToolBar from "./ToolBar";
-import Grid from "./Grid"
+import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 
@@ -16,7 +16,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
 
-  const [algorithm, setAlgorithm] = useState<Algorithm>(new Dijkstra());
+  const [algorithm, setAlgorithm] = useState(new Dijkstra());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   return (
@@ -24,10 +24,16 @@ const PathFindingVisualizer: React.FC = () => {
       <header className="header">
         <ToolBar
           runButton={{ val: isRunning, set: setIsRunning }}
-          droppedObstruction={{ val: droppedObstruction, set: setDroppedObstruction}}
+          droppedObstruction={{
+            val: droppedObstruction,
+            set: setDroppedObstruction,
+          }}
           isBrushing={{ val: isBrushing, set: setIsBrushing }}
           isErasing={{ val: isErasing, set: setIsErasing }}
-          isErasingAlgorithm={{ val: isErasingAlgorithm, set: setIsErasingAlgorithm }}
+          isErasingAlgorithm={{
+            val: isErasingAlgorithm,
+            set: setIsErasingAlgorithm,
+          }}
           algorithm={{ val: algorithm, set: setAlgorithm }}
           setAnimationSpeed={setAnimationSpeed}
         />
@@ -45,9 +51,7 @@ const PathFindingVisualizer: React.FC = () => {
           animationSpeed={animationSpeed}
         />
       </div>
-      <div className="footer">
-        I hate css
-      </div>
+      <div className="footer">I hate css</div>
     </div>
   );
 };
