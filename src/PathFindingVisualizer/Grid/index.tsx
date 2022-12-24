@@ -49,8 +49,8 @@ const Grid: React.FC<GridProps> = ({
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
   const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState<NodeType>({
-    row: START_END_COORDS.START_NODE_ROW,
-    col: START_END_COORDS.START_NODE_COL,
+    row: 4,
+    col: 10,
     weight: 1,
     state: NODE_STATE.START,
   });
@@ -139,6 +139,7 @@ const Grid: React.FC<GridProps> = ({
   ]);
 
   const handleMouseDown = (row: number, col: number) => {
+    console.log("mouse down", grid);
     if (isRunning) return;
     setMouseIsPressed(true);
 

@@ -63,7 +63,7 @@ const useGrid = (rows: number, cols: number): useGridType => {
       }
     }
     return grid;
-  }, []);
+  }, [rows, cols]);
 
   // Create a new grid with grid[row][col] modified to value
   const setCell = useCallback(

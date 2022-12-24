@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from "react";
+import React, { useState, useLayoutEffect, createRef } from "react";
 
 // local imports
 import "./PathFindingVisualizer.css";
@@ -7,11 +7,11 @@ import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 import BFS from "../algorithms/BFS";
-import { NODE_SIZE } from "../constants";
+import { GRID_SIZE, NODE_SIZE } from "../constants";
 
 const useRefDimensions = (ref: React.RefObject<HTMLDivElement>) => {
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  useEffect(() => {
+  const [dimensions, setDimensions] = useState({ width: 23, height: 23 });
+  useLayoutEffect(() => {
     if (!ref.current) {
       console.error("ref.current is null");
       return;
@@ -19,7 +19,6 @@ const useRefDimensions = (ref: React.RefObject<HTMLDivElement>) => {
     const boundingRect = ref.current.getBoundingClientRect();
     const { width, height } = boundingRect;
     setDimensions({ width: Math.round(width), height: Math.round(height) });
-    console.log(width, height);
   }, []);
 
   return dimensions;
@@ -68,8 +67,10 @@ const PathFindingVisualizer: React.FC = () => {
           isErasing={isErasing}
           isErasingAlgorithm={isErasingAlgorithm}
           setIsErasingAlgorithm={setIsErasingAlgorithm}
-          cols={Math.floor(contentWidth / NODE_SIZE)}
-          rows={Math.floor(contentHeight / NODE_SIZE)}
+          // rows={Math.floor(contentHeight / NODE_SIZE)}
+          // cols={Math.floor(contentWidth / NODE_SIZE)}
+          rows={GRID_SIZE.ROW_SIZE}
+          cols={GRID_SIZE.COL_SIZE}
           algorithm={algorithm}
           animationSpeed={animationSpeed}
         />
