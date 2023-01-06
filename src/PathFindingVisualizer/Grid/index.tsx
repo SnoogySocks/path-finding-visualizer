@@ -244,6 +244,15 @@ const Grid: React.FC<GridProps> = ({
     setIsErasingAlgorithm(false);
   }, [isErasingAlgorithm]);
 
+  // update start node
+  useEffect(() => {
+    setStartNode({
+      ...startNode,
+      row: Math.floor(rows * START_END_RATIO.START.ROW),
+      col: Math.floor(cols * START_END_RATIO.START.COL),
+    });
+  }, [rows, cols]);
+
   return (
     <div className="grid-container">
       <div className="grid-border" onMouseUp={handleMouseUp}>
