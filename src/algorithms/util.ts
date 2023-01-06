@@ -2,11 +2,11 @@ import { NodeType } from "../PathFindingVisualizer/Node";
 
 // https://stackoverflow.com/questions/42919469/efficient-way-to-implement-priority-queue-in-javascript
 // Thank you stack overflow very cool
-export class PriorityQueue {
-  _heap: NodeType[];
-  _comparator: (a: NodeType, b: NodeType) => boolean;
+export class PriorityQueue<T> {
+  _heap: T[];
+  _comparator: (a: T, b: T) => boolean;
 
-  constructor(comparator = (a: NodeType, b: NodeType) => a.weight < b.weight) {
+  constructor(comparator: (a: T, b: T) => boolean) {
     this._heap = [];
     this._comparator = comparator;
   }
@@ -23,7 +23,7 @@ export class PriorityQueue {
     return this._heap[this.top()];
   }
 
-  push(...values: NodeType[]) {
+  push(...values: T[]) {
     values.forEach((value) => {
       this._heap.push(value);
       this._siftUp();
@@ -81,7 +81,8 @@ export class PriorityQueue {
       (this.right(node) < this.size() && this._greater(this.right(node), node))
     ) {
       let maxChild =
-        this.right(node) < this.size() && this._greater(this.right(node), this.left(node))
+        this.right(node) < this.size() &&
+        this._greater(this.right(node), this.left(node))
           ? this.right(node)
           : this.left(node);
       this._swap(node, maxChild);
