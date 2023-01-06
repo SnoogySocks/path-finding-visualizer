@@ -93,36 +93,36 @@ export class PriorityQueue<T> {
 
 export class Queue {
   _queue: NodeType[];
-  constructor(){
-    this._queue = [];    
-    }
+  constructor() {
+    this._queue = [];
+  }
 
-    size () {
-      return this._queue.length;
-    }
+  size() {
+    return this._queue.length;
+  }
 
-    isEmpty(){
-      return this._queue.length == 0; 
-    }
+  isEmpty() {
+    return this._queue.length == 0;
+  }
 
-    peek(){
-      return this._queue[0];
-    }
+  peek() {
+    return this._queue[0];
+  }
 
-    push(...values: NodeType[]){
-      values.forEach((value) => {
-        this._queue.push(value)
-      });
-      return this._queue.length;
-    }
-    
-    pop(){
-      return this._queue.shift();
-    }
+  push(...values: NodeType[]) {
+    values.forEach((value) => {
+      this._queue.push(value);
+    });
+    return this._queue.length;
+  }
+
+  pop() {
+    return this._queue.shift();
+  }
 }
 
 export const inBounds = (grid: NodeType[][], r: number, c: number) => {
-  return 0<=r && r<grid.length && 0<=c && c<grid[r].length;
+  return 0 <= r && r < grid.length && 0 <= c && c < grid[r].length;
 };
 
 export const findShortestPath = (
