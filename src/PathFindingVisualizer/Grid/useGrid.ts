@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { NodeType } from "../Node";
 
 // import local files
-import { START_END_COORDS, GRID_SIZE, NODE_STATE } from "../../constants";
+import { START_END_RATIO, NODE_STATE } from "../../constants";
 
 interface useGridType {
   grid: NodeType[][];
@@ -13,30 +13,32 @@ interface useGridType {
   clearGridState: (statesToClear: string[], draggedNode: NodeType) => boolean;
 }
 
-const useGrid = (): useGridType => {
+const useGrid = (rows: number, cols: number): useGridType => {
   const [grid, setGrid] = useState<NodeType[][]>([]);
 
-  const initNode = useCallback((row: number, col: number): NodeType => {
-    let state = "";
-    if (
-      row === START_END_COORDS.START_NODE_ROW &&
-      col === START_END_COORDS.START_NODE_COL
-    ) {
-      state = NODE_STATE.START;
-    } else if (
-      row === START_END_COORDS.END_NODE_ROW &&
-      col === START_END_COORDS.END_NODE_COL
-    ) {
-      state = NODE_STATE.END;
-    }
+  const initNode = useCallback(
+    (
+      row: number,
+      col: number,
+      start: { row: number; col: number },
+      end: { row: number; col: number }
+    ): NodeType => {
+      let state = "";
+      if (row === start.row && col === start.col) {
+        state = NODE_STATE.START;
+      } else if (row === end.row && col === end.col) {
+        state = NODE_STATE.END;
+      }
 
-    return {
-      row,
-      col,
-      weight: 1,
-      state,
-    };
-  }, []);
+      return {
+        row,
+        col,
+        weight: 1,
+        state,
+      };
+    },
+    []
+  );
 
   const initNodeFromDOM = (row: number, col: number): NodeType => {
     let state = "";
@@ -55,15 +57,24 @@ const useGrid = (): useGridType => {
   };
 
   const initGrid = useCallback(() => {
-    let grid = new Array(GRID_SIZE.ROW_SIZE);
+    const start = {
+      row: Math.floor(rows * START_END_RATIO.START.ROW),
+      col: Math.floor(cols * START_END_RATIO.START.COL),
+    };
+    const end = {
+      row: Math.floor(rows * START_END_RATIO.END.ROW),
+      col: Math.floor(cols * START_END_RATIO.END.COL),
+    };
+
+    let grid = new Array(rows);
     for (let r = 0; r < grid.length; ++r) {
-      grid[r] = new Array(GRID_SIZE.COL_SIZE);
+      grid[r] = new Array(cols);
       for (let c = 0; c < grid[r].length; ++c) {
-        grid[r][c] = initNode(r, c);
+        grid[r][c] = initNode(r, c, start, end);
       }
     }
     return grid;
-  }, []);
+  }, [rows, cols]);
 
   // Create a new grid with grid[row][col] modified to value
   const setCell = useCallback(
