@@ -36,7 +36,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
 
-  const [algorithm, setAlgorithm] = useState(new AStar());
+  const [algorithm, setAlgorithm] = useState<Algorithm>(new AStar());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   const ref = createRef<HTMLDivElement>();
