@@ -96,7 +96,7 @@ export default class Astar extends Algorithm {
                     return { steps, shortestPath: findShortestPath(parents, endNode) }
                 }
 
-                let gNew = aStarGrid[r][c].g + 1;
+                let gNew = aStarGrid[r][c].g + grid[rr][cc].weight;
                 let hNew = this.heuristic(grid[rr][cc], endNode);
                 let fNew = gNew + hNew;
 
