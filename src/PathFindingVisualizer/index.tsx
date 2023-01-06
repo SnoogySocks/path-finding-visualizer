@@ -7,7 +7,7 @@ import Grid from "./Grid"
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 import BFS from "../algorithms/BFS";
-import AStar from "../algorithms/Astar";
+import Astar from "../algorithms/Astar";
 
 const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -17,7 +17,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isBrushing, setIsBrushing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
-  const [algorithm, setAlgorithm] = useState(new AStar());
+  const [algorithm, setAlgorithm] = useState<Algorithm>(new Astar());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   return (
