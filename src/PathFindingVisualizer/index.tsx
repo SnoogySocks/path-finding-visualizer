@@ -3,10 +3,10 @@ import React, { useState } from "react";
 // local imports
 import "./PathFindingVisualizer.css";
 import ToolBar from "./ToolBar";
-import Grid from "./Grid"
+import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
-import BFS from "../algorithms/BFS"
+import BFS from "../algorithms/BFS";
 
 const PathFindingVisualizer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
