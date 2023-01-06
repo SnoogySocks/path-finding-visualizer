@@ -2,11 +2,11 @@ import { NodeType } from "../PathFindingVisualizer/Node";
 
 // https://stackoverflow.com/questions/42919469/efficient-way-to-implement-priority-queue-in-javascript
 // Thank you stack overflow very cool
-export class PriorityQueue<T> {
-  _heap: T[];
-  _comparator: (a: T, b: T) => boolean;
+export class PriorityQueue {
+  _heap: NodeType[];
+  _comparator: (a: NodeType, b: NodeType) => boolean;
 
-  constructor(comparator: (a: T, b: T) => boolean) {
+  constructor(comparator = (a: NodeType, b: NodeType) => a.weight < b.weight) {
     this._heap = [];
     this._comparator = comparator;
   }
@@ -23,7 +23,7 @@ export class PriorityQueue<T> {
     return this._heap[this.top()];
   }
 
-  push(...values: T[]) {
+  push(...values: NodeType[]) {
     values.forEach((value) => {
       this._heap.push(value);
       this._siftUp();
@@ -81,8 +81,7 @@ export class PriorityQueue<T> {
       (this.right(node) < this.size() && this._greater(this.right(node), node))
     ) {
       let maxChild =
-        this.right(node) < this.size() &&
-        this._greater(this.right(node), this.left(node))
+        this.right(node) < this.size() && this._greater(this.right(node), this.left(node))
           ? this.right(node)
           : this.left(node);
       this._swap(node, maxChild);
@@ -93,36 +92,36 @@ export class PriorityQueue<T> {
 
 export class Queue {
   _queue: NodeType[];
-  constructor() {
-    this._queue = [];
-  }
+  constructor(){
+    this._queue = [];    
+    }
 
-  size() {
-    return this._queue.length;
-  }
+    size () {
+      return this._queue.length;
+    }
 
-  isEmpty() {
-    return this._queue.length == 0;
-  }
+    isEmpty(){
+      return this._queue.length == 0; 
+    }
 
-  peek() {
-    return this._queue[0];
-  }
+    peek(){
+      return this._queue[0];
+    }
 
-  push(...values: NodeType[]) {
-    values.forEach((value) => {
-      this._queue.push(value);
-    });
-    return this._queue.length;
-  }
-
-  pop() {
-    return this._queue.shift();
-  }
+    push(...values: NodeType[]){
+      values.forEach((value) => {
+        this._queue.push(value)
+      });
+      return this._queue.length;
+    }
+    
+    pop(){
+      return this._queue.shift();
+    }
 }
 
 export const inBounds = (grid: NodeType[][], r: number, c: number) => {
-  return 0 <= r && r < grid.length && 0 <= c && c < grid[r].length;
+  return 0<=r && r<grid.length && 0<=c && c<grid[r].length;
 };
 
 export const findShortestPath = (

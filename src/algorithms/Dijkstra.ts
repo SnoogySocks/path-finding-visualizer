@@ -32,7 +32,7 @@ export default class Dijkstra extends Algorithm {
     }
 
     // Start fro the start node
-    let queue = new PriorityQueue<NodeType>((a: NodeType, b: NodeType) => a.weight<b.weight);
+    let queue = new PriorityQueue();
     queue.push(start);
     dis[start.row][start.col] = 0;
 
