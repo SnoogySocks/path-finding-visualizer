@@ -7,6 +7,7 @@ import Grid from "./Grid";
 import Algorithm from "../algorithms/Algorithm";
 import Dijkstra from "../algorithms/Dijkstra";
 import BFS from "../algorithms/BFS";
+import Astar from "../algorithms/Astar";
 import { GRID_PADDING, NODE_SIZE, SM } from "../constants";
 
 // Find the dimensions of a div element
@@ -34,8 +35,7 @@ const PathFindingVisualizer: React.FC = () => {
   const [isBrushing, setIsBrushing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
   const [isErasingAlgorithm, setIsErasingAlgorithm] = useState(false);
-
-  const [algorithm, setAlgorithm] = useState(new Dijkstra());
+  const [algorithm, setAlgorithm] = useState<Algorithm>(new Astar());
   const [animationSpeed, setAnimationSpeed] = useState(1);
 
   const ref = createRef<HTMLDivElement>();
