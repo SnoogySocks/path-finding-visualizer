@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 
 // local imports
 import {
-  START_END_COORDS,
+  START_END_RATIO,
   NODE_STATE,
   SPECIAL_STATES,
   ANIMATION_SPEED,
@@ -23,6 +23,8 @@ interface GridProps {
   isErasing: boolean;
   isErasingAlgorithm: boolean;
   setIsErasingAlgorithm: (isErasingAlgorithm: boolean) => void;
+  rows: number;
+  cols: number;
   algorithm: Algorithm;
   animationSpeed: number;
 }
@@ -35,17 +37,20 @@ const Grid: React.FC<GridProps> = ({
   isErasing,
   isErasingAlgorithm,
   setIsErasingAlgorithm,
+  rows,
+  cols,
   algorithm,
   animationSpeed,
 }) => {
-  const { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState } = useGrid();
+  const { grid, setGrid, setCell, setCellTopDOM, setCellDOM, clearGridState } =
+    useGrid(rows, cols);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [hasProcessedSteps, setHasProcessedSteps] = useState(false);
   const [hasDisplayedPath, setHasDisplayedPath] = useState(false);
   const [pendingAnimations, setPendingAnimations] = useState<number[]>([]);
   const [startNode, setStartNode] = useState<NodeType>({
-    row: START_END_COORDS.START_NODE_ROW,
-    col: START_END_COORDS.START_NODE_COL,
+    row: Math.floor(rows * START_END_RATIO.START.ROW),
+    col: Math.floor(cols * START_END_RATIO.START.COL),
     weight: 1,
     state: NODE_STATE.START,
   });
@@ -134,6 +139,7 @@ const Grid: React.FC<GridProps> = ({
   ]);
 
   const handleMouseDown = (row: number, col: number) => {
+    console.log("mouse down", grid);
     if (isRunning) return;
     setMouseIsPressed(true);
 
